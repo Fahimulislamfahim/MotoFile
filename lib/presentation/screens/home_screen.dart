@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/theme_service.dart';
+import '../../core/services/card_order_service.dart';
+import '../../core/services/view_mode_service.dart';
 import '../../data/database_helper.dart';
 import '../../data/models/document_model.dart';
 import '../widgets/dashboard_card.dart';
+import '../widgets/document_list_tile.dart';
+import '../widgets/document_card_view.dart';
+import '../widgets/app_drawer.dart';
 import 'add_document_screen.dart';
 import 'pdf_viewer_screen.dart';
 
@@ -18,7 +23,9 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Document> _documents = [];
   bool _isLoading = true;
   final TextEditingController _searchController = TextEditingController();
-  String _filter = 'All'; // All, Expiring Soon, Expired, Missing
+  String _filter = 'All';
+  final CardOrderService _cardOrderService = CardOrderService();
+  final ViewModeService _viewModeService = ViewModeService();
 
   final List<String> _defaultTypes = [
     'Driving License',
@@ -28,10 +35,14 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   List<String> _displayTypes = [];
+  List<String> _savedOrder = [];
+  ViewMode _viewMode = ViewMode.grid;
 
   @override
   void initState() {
     super.initState();
+    _loadCardOrder();
+    _loadViewMode();
     _refreshDocuments();
     _searchController.addListener(_filterDocuments);
   }
@@ -40,6 +51,34 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadCardOrder() async {
+    final order = await _cardOrderService.getCardOrder();
+    setState(() {
+      _savedOrder = order;
+    });
+  }
+
+  Future<void> _loadViewMode() async {
+    final mode = await _viewModeService.getViewMode();
+    setState(() {
+      _viewMode = mode;
+    });
+  }
+
+  Future<void> _saveCardOrder() async {
+    await _cardOrderService.saveCardOrder(_displayTypes);
+    setState(() {
+      _savedOrder = List.from(_displayTypes);
+    });
+  }
+
+  Future<void> _changeViewMode(ViewMode mode) async {
+    await _viewModeService.saveViewMode(mode);
+    setState(() {
+      _viewMode = mode;
+    });
   }
 
   Future<void> _refreshDocuments() async {
@@ -55,28 +94,38 @@ class _HomeScreenState extends State<HomeScreen> {
   void _filterDocuments() {
     final query = _searchController.text.toLowerCase();
     
-    // 1. Get all unique types from DB + Defaults
     final dbTypes = _documents.map((d) => d.docType).toSet();
     final allTypes = {..._defaultTypes, ...dbTypes}.toList();
     
-    setState(() {
-      _displayTypes = allTypes.where((type) {
-        // Search Filter
-        if (query.isNotEmpty && !type.toLowerCase().contains(query)) {
-          return false;
-        }
+    final filteredTypes = allTypes.where((type) {
+      if (query.isNotEmpty && !type.toLowerCase().contains(query)) {
+        return false;
+      }
 
-        // Status Filter
-        if (_filter == 'All') return true;
-        
-        final doc = _getDocumentForType(type);
-        if (_filter == 'Missing') return doc.status == 'Missing';
-        if (_filter == 'Expired') return doc.status == 'Expired';
-        if (_filter == 'Expiring Soon') return doc.status == 'Expiring';
-        
-        return true;
-      }).toList();
+      if (_filter == 'All') return true;
+      
+      final doc = _getDocumentForType(type);
+      if (_filter == 'Missing') return doc.status == 'Missing';
+      if (_filter == 'Expired') return doc.status == 'Expired';
+      if (_filter == 'Expiring Soon') return doc.status == 'Expiring';
+      
+      return true;
+    }).toList();
+
+    final sortedTypes = _cardOrderService.sortByOrder(filteredTypes, _savedOrder);
+    
+    setState(() {
+      _displayTypes = sortedTypes;
     });
+  }
+
+  DateTime? _parseDate(String? dateString) {
+    if (dateString == null || dateString.isEmpty) return null;
+    try {
+      return DateTime.parse(dateString);
+    } catch (e) {
+      return null;
+    }
   }
 
   Document _getDocumentForType(String type) {
@@ -92,20 +141,145 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _onReorder(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final item = _displayTypes.removeAt(oldIndex);
+      _displayTypes.insert(newIndex, item);
+    });
+    
+    _saveCardOrder();
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Card order saved'),
+        duration: const Duration(seconds: 1),
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+    );
+  }
+
+  void _navigateToDocument(String title) {
+    final doc = _getDocumentForType(title);
+    if (doc.status == 'Missing') {
+      _navigateToAddDocument(title);
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PDFViewerScreen(
+            filePath: doc.filePath,
+            title: title,
+            documentId: doc.id!,
+          ),
+        ),
+      ).then((value) {
+        if (value == true) _refreshDocuments();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeService = Provider.of<ThemeService>(context);
     final isDark = themeService.isDarkMode;
 
     return Scaffold(
+      drawer: const AppDrawer(),
       appBar: AppBar(
         title: const Text('MotoFile Dashboard'),
         actions: [
-          IconButton(
-            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-            onPressed: () {
-              themeService.toggleTheme();
-            },
+          // View Mode Switcher
+          PopupMenuButton<ViewMode>(
+            icon: Icon(
+              _viewMode == ViewMode.grid
+                  ? Icons.grid_view
+                  : _viewMode == ViewMode.list
+                      ? Icons.view_list
+                      : Icons.view_agenda,
+              color: Theme.of(context).primaryColor,
+            ),
+            tooltip: 'Change View',
+            onSelected: _changeViewMode,
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: ViewMode.grid,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.grid_view,
+                      color: _viewMode == ViewMode.grid
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Grid View',
+                      style: TextStyle(
+                        color: _viewMode == ViewMode.grid
+                            ? Theme.of(context).primaryColor
+                            : null,
+                        fontWeight: _viewMode == ViewMode.grid
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: ViewMode.list,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.view_list,
+                      color: _viewMode == ViewMode.list
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'List View',
+                      style: TextStyle(
+                        color: _viewMode == ViewMode.list
+                            ? Theme.of(context).primaryColor
+                            : null,
+                        fontWeight: _viewMode == ViewMode.list
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: ViewMode.card,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.view_agenda,
+                      color: _viewMode == ViewMode.card
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Card View',
+                      style: TextStyle(
+                        color: _viewMode == ViewMode.card
+                            ? Theme.of(context).primaryColor
+                            : null,
+                        fontWeight: _viewMode == ViewMode.card
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -161,52 +335,13 @@ class _HomeScreenState extends State<HomeScreen> {
               }).toList(),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _displayTypes.isEmpty
                     ? Center(child: Text('No documents found', style: TextStyle(color: Colors.grey[400])))
-                    : Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: GridView.builder(
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                            childAspectRatio: 0.85,
-                          ),
-                          itemCount: _displayTypes.length,
-                          itemBuilder: (context, index) {
-                            final title = _displayTypes[index];
-                            final doc = _getDocumentForType(title);
-
-                            return DashboardCard(
-                              title: title,
-                              expiryDate: doc.expiryDate,
-                              status: doc.status,
-                              onTap: () {
-                                if (doc.status == 'Missing') {
-                                  _navigateToAddDocument(title);
-                                } else {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => PDFViewerScreen(
-                                        filePath: doc.filePath,
-                                        title: title,
-                                        documentId: doc.id!,
-                                      ),
-                                    ),
-                                  ).then((value) {
-                                    if (value == true) _refreshDocuments();
-                                  });
-                                }
-                              },
-                            );
-                          },
-                        ),
-                      ),
+                    : _buildDocumentView(),
           ),
         ],
       ),
@@ -215,6 +350,82 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Theme.of(context).primaryColor,
         child: const Icon(Icons.add, color: Colors.black),
       ),
+    );
+  }
+
+  Widget _buildDocumentView() {
+    switch (_viewMode) {
+      case ViewMode.grid:
+        return _buildGridView();
+      case ViewMode.list:
+        return _buildListView();
+      case ViewMode.card:
+        return _buildCardView();
+    }
+  }
+
+  Widget _buildGridView() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 0.85,
+        ),
+        itemCount: _displayTypes.length,
+        itemBuilder: (context, index) {
+          final title = _displayTypes[index];
+          final doc = _getDocumentForType(title);
+          
+          return DashboardCard(
+            key: ValueKey(title),
+            title: title,
+            expiryDate: doc.expiryDate,
+            status: doc.status,
+            onTap: () => _navigateToDocument(title),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildListView() {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: _displayTypes.length,
+      itemBuilder: (context, index) {
+        final title = _displayTypes[index];
+        final doc = _getDocumentForType(title);
+        
+        return DocumentListTile(
+          key: ValueKey(title),
+          title: title,
+          expiryDate: _parseDate(doc.expiryDate),
+          status: doc.status,
+          onTap: () => _navigateToDocument(title),
+        );
+      },
+    );
+  }
+
+  Widget _buildCardView() {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: _displayTypes.length,
+      itemBuilder: (context, index) {
+        final title = _displayTypes[index];
+        final doc = _getDocumentForType(title);
+        
+        return DocumentCardView(
+          key: ValueKey(title),
+          title: title,
+          expiryDate: _parseDate(doc.expiryDate),
+          status: doc.status,
+          onTap: () => _navigateToDocument(title),
+        );
+      },
     );
   }
 
