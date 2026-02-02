@@ -399,7 +399,7 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
                 ],
               ),
               const SizedBox(height: 24),
-              _buildInfoRow(context, 'Version', '1.0.0', Icons.info_outline),
+              _buildInfoRow(context, 'Version', '1.0.1', Icons.info_outline),
               const SizedBox(height: 16),
               _buildInfoRow(context, 'Build', '1', Icons.build_circle_outlined),
               const SizedBox(height: 16),
@@ -440,23 +440,6 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
   Widget _buildCopyright(BuildContext context, bool isDark) {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).primaryColor.withValues(alpha: 0.2),
-                Theme.of(context).primaryColor.withValues(alpha: 0.1),
-              ],
-            ),
-          ),
-          child: Icon(
-            Icons.favorite,
-            color: Theme.of(context).primaryColor,
-            size: 24,
-          ),
-        ),
         const SizedBox(height: 12),
         Text(
           '© 2026 MotoFile',

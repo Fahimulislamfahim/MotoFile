@@ -379,12 +379,51 @@ class _HomeScreenState extends State<HomeScreen> {
           final title = _displayTypes[index];
           final doc = _getDocumentForType(title);
           
-          return DashboardCard(
-            key: ValueKey(title),
-            title: title,
-            expiryDate: doc.expiryDate,
-            status: doc.status,
-            onTap: () => _navigateToDocument(title),
+          return LongPressDraggable<int>(
+            data: index,
+            feedback: Material(
+              elevation: 8,
+              borderRadius: BorderRadius.circular(16),
+              child: Opacity(
+                opacity: 0.8,
+                child: Transform.scale(
+                  scale: 1.05,
+                  child: SizedBox(
+                    width: (MediaQuery.of(context).size.width - 48) / 2,
+                    child: DashboardCard(
+                      title: title,
+                      expiryDate: doc.expiryDate,
+                      status: doc.status,
+                      onTap: () {},
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            childWhenDragging: Opacity(
+              opacity: 0.3,
+              child: DashboardCard(
+                key: ValueKey(title),
+                title: title,
+                expiryDate: doc.expiryDate,
+                status: doc.status,
+                onTap: () => _navigateToDocument(title),
+              ),
+            ),
+            child: DragTarget<int>(
+              onAcceptWithDetails: (details) {
+                _onReorder(details.data, index);
+              },
+              builder: (context, candidateData, rejectedData) {
+                return DashboardCard(
+                  key: ValueKey(title),
+                  title: title,
+                  expiryDate: doc.expiryDate,
+                  status: doc.status,
+                  onTap: () => _navigateToDocument(title),
+                );
+              },
+            ),
           );
         },
       ),
@@ -392,9 +431,25 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildListView() {
-    return ListView.builder(
+    return ReorderableListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: _displayTypes.length,
+      onReorder: _onReorder,
+      proxyDecorator: (child, index, animation) {
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: 1.02,
+              child: Opacity(
+                opacity: 0.9,
+                child: child,
+              ),
+            );
+          },
+          child: child,
+        );
+      },
       itemBuilder: (context, index) {
         final title = _displayTypes[index];
         final doc = _getDocumentForType(title);
@@ -411,9 +466,25 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCardView() {
-    return ListView.builder(
+    return ReorderableListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: _displayTypes.length,
+      onReorder: _onReorder,
+      proxyDecorator: (child, index, animation) {
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: 1.02,
+              child: Opacity(
+                opacity: 0.9,
+                child: child,
+              ),
+            );
+          },
+          child: child,
+        );
+      },
       itemBuilder: (context, index) {
         final title = _displayTypes[index];
         final doc = _getDocumentForType(title);

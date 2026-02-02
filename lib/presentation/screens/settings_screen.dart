@@ -12,7 +12,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
-  String _selectedLanguage = 'English';
 
   @override
   Widget build(BuildContext context) {
@@ -86,29 +85,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
                 activeColor: Theme.of(context).primaryColor,
               ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Language',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).primaryColor,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 12),
-          _buildGlassCard(
-            context,
-            isDark,
-            child: _buildSettingTile(
-              context,
-              icon: Icons.language,
-              title: 'App Language',
-              subtitle: _selectedLanguage,
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                _showLanguageDialog(context);
-              },
             ),
           ),
           const SizedBox(height: 24),
@@ -227,44 +203,4 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showLanguageDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Select Language'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildLanguageOption('English'),
-            _buildLanguageOption('বাংলা'),
-            _buildLanguageOption('हिन्दी'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLanguageOption(String language) {
-    return RadioListTile<String>(
-      title: Text(language),
-      value: language,
-      groupValue: _selectedLanguage,
-      activeColor: Theme.of(context).primaryColor,
-      onChanged: (value) {
-        setState(() {
-          _selectedLanguage = value!;
-        });
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Language changed to $value')),
-        );
-      },
-    );
-  }
 }
