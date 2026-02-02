@@ -16,28 +16,13 @@ class CardOrderService {
     final prefs = await SharedPreferences.getInstance();
     final savedOrder = prefs.getStringList(_orderKey);
     
+    // Return saved order if it exists, otherwise return default order
     if (savedOrder == null || savedOrder.isEmpty) {
       return List.from(defaultOrder);
     }
     
-    // Merge saved order with any new default types
-    final mergedOrder = <String>[];
-    
-    // Add saved items first (in saved order)
-    for (final item in savedOrder) {
-      if (defaultOrder.contains(item)) {
-        mergedOrder.add(item);
-      }
-    }
-    
-    // Add any new default items that weren't in saved order
-    for (final item in defaultOrder) {
-      if (!mergedOrder.contains(item)) {
-        mergedOrder.add(item);
-      }
-    }
-    
-    return mergedOrder;
+    // Return the complete saved order (including custom types)
+    return savedOrder;
   }
 
   // Save card order

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import '../../data/database_helper.dart';
 import '../../data/models/document_model.dart';
 import '../../core/services/notification_service.dart';
@@ -54,7 +55,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['pdf'],
+      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
     );
 
     if (result != null) {
@@ -63,7 +64,11 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
         _pickedFile = file;
       });
 
-      // Auto-scan PDF
+      // Check if it's a PDF or image
+      final extension = path.extension(file.path).toLowerCase();
+      final isPdf = extension == '.pdf';
+
+      // Auto-scan for dates
       if (mounted) {
         showDialog(
           context: context,
@@ -77,7 +82,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
                 const CircularProgressIndicator(),
                 const SizedBox(height: 20),
                 Text(
-                  'Scanning PDF for dates...',
+                  isPdf ? 'Scanning PDF for dates...' : 'Scanning image for dates...',
                    style: TextStyle(
                      color: Theme.of(context).textTheme.bodyLarge?.color,
                      fontWeight: FontWeight.w500
@@ -99,7 +104,9 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
 
       try {
         final ocrService = OCRService();
-        final results = await ocrService.scanPdf(file);
+        final results = isPdf 
+            ? await ocrService.scanPdf(file)
+            : await ocrService.scanDocument(file);
         
         if (mounted) {
           Navigator.pop(context); // Close loading
@@ -128,7 +135,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
         }
       } catch (e) {
         if (mounted) Navigator.pop(context);
-        print('Error scanning PDF: $e');
+        print('Error scanning file: $e');
       }
     }
   }
@@ -152,57 +159,120 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
   }
 
   Future<void> _scanDocument() async {
-    // ... existing camera scan logic (unchanged for now, but could be unified) ...
-    // keeping it simple as user asked for PDF upload detection specificallly
-    // Reuse existing implementation but verify it handles nullable types compatible variables
     final picker = ImagePicker();
     final image = await picker.pickImage(source: ImageSource.camera);
     
-    if (image != null) {
-      final ocrService = OCRService();
-      final File imageFile = File(image.path);
-      
-      // Show loading indicator
-      if (mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (ctx) => const Center(child: CircularProgressIndicator()),
-        );
-      }
+    if (image == null) return;
 
-      try {
-        final dates = await ocrService.scanDocument(imageFile);
+    // Crop the image
+    final croppedFile = await ImageCropper().cropImage(
+      sourcePath: image.path,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Document',
+          toolbarColor: Theme.of(context).primaryColor,
+          toolbarWidgetColor: Colors.white,
+          statusBarColor: Theme.of(context).primaryColor,
+          activeControlsWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.original,
+          lockAspectRatio: false,
+          hideBottomControls: false,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9,
+          ],
+        ),
+        IOSUiSettings(
+          title: 'Crop Document',
+          aspectRatioPresets: [
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9,
+          ],
+        ),
+      ],
+    );
+
+    if (croppedFile == null) return;
+
+    // Save cropped image to _pickedFile so it can be saved
+    final File croppedImageFile = File(croppedFile.path);
+    setState(() {
+      _pickedFile = croppedImageFile;
+    });
+
+    // Show loading indicator for OCR
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: Theme.of(context).cardColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 20),
+              Text(
+                'Scanning image for dates...',
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                  fontWeight: FontWeight.w500
+                )
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    try {
+      final ocrService = OCRService();
+      final dates = await ocrService.scanDocument(croppedImageFile);
+      
+      if (mounted) {
+        Navigator.pop(context); // Close loading
+        setState(() {
+          if (dates['issueDate'] != null) _issueDate = dates['issueDate'];
+          if (dates['expiryDate'] != null) _expiryDate = dates['expiryDate'];
+        });
         
-        if (mounted) {
-          Navigator.pop(context); // Close loading
-          setState(() {
-            if (dates['issueDate'] != null) _issueDate = dates['issueDate'];
-            if (dates['expiryDate'] != null) _expiryDate = dates['expiryDate'];
-          });
-          
+        if (dates['issueDate'] != null || dates['expiryDate'] != null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Scanned: Found ${_issueDate != null ? "Issue" : ""} ${_expiryDate != null ? "Expiry" : ""} dates')),
+            SnackBar(
+              content: Text('Found dates: ${dates['expiryDate'] != null ? "Expiry: ${DateFormat('dd-MMM-yyyy').format(dates['expiryDate']!)}" : "Issue date detected"}'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No dates detected. You can enter them manually.'),
+              backgroundColor: Colors.orange,
+            ),
           );
         }
-      } catch (e) {
-         if (mounted) {
-          Navigator.pop(context);
-           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error scanning: $e')),
-          );
-         }
-      } finally {
-        // ocrService.dispose(); // Removed dispose as it was likely closing native resources too aggressively or not needed if service is transient
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error scanning: $e')),
+        );
       }
     }
   }
 
   Future<void> _saveDocument() async {
     if (_formKey.currentState!.validate() && _pickedFile != null) {
-      // 1. Save file to app directory
+      // 1. Save file to app directory with correct extension
       final appDir = await getApplicationDocumentsDirectory();
-      final fileName = '${_selectedType!.replaceAll(" ", "_")}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final fileExtension = path.extension(_pickedFile!.path);
+      final fileName = '${_selectedType!.replaceAll(" ", "_")}_${DateTime.now().millisecondsSinceEpoch}$fileExtension';
       final savedFile = await _pickedFile!.copy(path.join(appDir.path, fileName));
 
       // 2. Calculate status
@@ -241,7 +311,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
       }
     } else if (_pickedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a PDF file')),
+        const SnackBar(content: Text('Please select a file or scan a document')),
       );
     }
   }
@@ -294,7 +364,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _pickFile,
                       icon: const Icon(Icons.upload_file),
-                      label: Text(_pickedFile == null ? 'Pick PDF' : 'File Selected'),
+                      label: Text(_pickedFile == null ? 'Pick File' : 'File Selected'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _pickedFile != null ? Colors.green : null,
                       ),
@@ -305,7 +375,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _scanDocument,
                       icon: const Icon(Icons.camera_alt),
-                      label: const Text('Scan Info'),
+                      label: const Text('Scan Doc'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                         foregroundColor: Colors.white,

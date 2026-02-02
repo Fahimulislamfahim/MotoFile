@@ -48,6 +48,7 @@ dependencies:
   google_mlkit_text_recognition: ^0.14.0
   share_plus: ^10.1.4
   image_picker: ^1.1.2
+  image_cropper: ^8.0.2
   provider: ^6.1.2
   shared_preferences: ^2.3.2
   printing: ^5.14.2
