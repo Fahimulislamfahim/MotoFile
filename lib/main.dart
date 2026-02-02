@@ -1,8 +1,22 @@
 import 'package:flutter/material.dart';
 import 'presentation/screens/splash_screen.dart';
+import 'core/services/notification_service.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'package:provider/provider.dart';
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_service.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().init();
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeService()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -10,21 +24,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MotoFile',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        primaryColor: const Color(0xFF121212),
-        scaffoldBackgroundColor: const Color(0xFF121212),
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF00FFFF),
-          secondary: Color(0xFF00FFFF),
-          surface: Color(0xFF1E1E1E),
-        ),
-        useMaterial3: true,
-      ),
-      home: const SplashScreen(),
+    return Consumer<ThemeService>(
+      builder: (context, themeService, child) {
+        return MaterialApp(
+          title: 'MotoFile',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeService.themeMode,
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 }

@@ -39,17 +39,16 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.fingerprint, size: 80, color: Color(0xFF00FFFF)),
+            Icon(Icons.fingerprint, size: 80, color: Theme.of(context).primaryColor),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'MotoFile Locked',
               style: TextStyle(
-                color: Colors.white,
+                color: Theme.of(context).textTheme.titleLarge?.color,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -59,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen> {
               onTap: _checkAuth,
               child: Text(
                 _message,
-                style: const TextStyle(color: Colors.grey),
+                style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
               ),
             ),
           ],

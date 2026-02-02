@@ -4,8 +4,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:image_picker/image_picker.dart';
 import '../../data/database_helper.dart';
 import '../../data/models/document_model.dart';
+import '../../core/services/notification_service.dart';
+import '../../core/services/ocr_service.dart';
 
 class AddDocumentScreen extends StatefulWidget {
   final String? preselectedType;
@@ -23,11 +26,13 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
   DateTime? _expiryDate;
   File? _pickedFile;
 
+  final _customTypeController = TextEditingController();
   final List<String> _docTypes = [
     'Driving License',
     'Registration',
     'Tax Token',
-    'Insurance'
+    'Insurance',
+    'Other'
   ];
 
   @override
@@ -38,6 +43,12 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
     } else {
       _selectedType = _docTypes.first;
     }
+  }
+
+  @override
+  void dispose() {
+    _customTypeController.dispose();
+    super.dispose();
   }
 
   Future<void> _pickFile() async {
@@ -71,6 +82,50 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
     }
   }
 
+  Future<void> _scanDocument() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.camera);
+    
+    if (image != null) {
+      final ocrService = OCRService();
+      final File imageFile = File(image.path);
+      
+      // Show loading indicator
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => const Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      try {
+        final dates = await ocrService.scanDocument(imageFile);
+        
+        if (mounted) {
+          Navigator.pop(context); // Close loading
+          setState(() {
+            if (dates['issueDate'] != null) _issueDate = dates['issueDate'];
+            if (dates['expiryDate'] != null) _expiryDate = dates['expiryDate'];
+          });
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Scanned: Found ${_issueDate != null ? "Issue" : ""} ${_expiryDate != null ? "Expiry" : ""} dates')),
+          );
+        }
+      } catch (e) {
+         if (mounted) {
+          Navigator.pop(context);
+           ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error scanning: $e')),
+          );
+         }
+      } finally {
+        ocrService.dispose();
+      }
+    }
+  }
+
   Future<void> _saveDocument() async {
     if (_formKey.currentState!.validate() && _pickedFile != null && _expiryDate != null) {
       // 1. Save file to app directory
@@ -89,15 +144,23 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
       }
 
       // 3. Save to DB
+      final typeToSave = _selectedType == 'Other' ? _customTypeController.text.trim() : _selectedType!;
       final document = Document(
-        docType: _selectedType!,
+        docType: typeToSave,
         filePath: savedFile.path,
         issueDate: _issueDate != null ? DateFormat('yyyy-MM-dd').format(_issueDate!) : '-',
         expiryDate: DateFormat('yyyy-MM-dd').format(_expiryDate!),
         status: status,
       );
 
-      await DatabaseHelper.instance.create(document);
+      final id = await DatabaseHelper.instance.create(document);
+
+      // Schedule notification
+      await NotificationService().scheduleExpiryNotification(
+        id: id,
+        title: typeToSave,
+        expiryDate: _expiryDate!,
+      );
 
       if (mounted) {
         Navigator.pop(context, true); // Return true to refresh
@@ -140,28 +203,68 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
                   });
                 },
               ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: _pickFile,
-                icon: const Icon(Icons.upload_file),
-                label: Text(_pickedFile == null ? 'Pick PDF' : 'File Selected: ${path.basename(_pickedFile!.path)}'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _pickedFile != null ? Colors.green : null,
+              if (_selectedType == 'Other')
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: TextFormField(
+                    controller: _customTypeController,
+                    decoration: const InputDecoration(labelText: 'Enter Document Type'),
+                    validator: (value) {
+                      if (_selectedType == 'Other' && (value == null || value.isEmpty)) {
+                        return 'Please enter a document type';
+                      }
+                      return null;
+                    },
+                  ),
                 ),
-              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _pickFile,
+                      icon: const Icon(Icons.upload_file),
+                      label: Text(_pickedFile == null ? 'Pick PDF' : 'File Selected'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _pickedFile != null ? Colors.green : null,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _scanDocument,
+                      icon: const Icon(Icons.camera_alt),
+                      label: const Text('Scan Info'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                  ],
+                ),
+              if (_pickedFile != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    'Selected: ${path.basename(_pickedFile!.path)}',
+                    style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+                  ),
+                ),
               const SizedBox(height: 16),
               ListTile(
                 title: Text(_issueDate == null
                     ? 'Select Issue Date (Optional)'
                     : 'Issue Date: ${DateFormat('yyyy-MM-dd').format(_issueDate!)}'),
-                trailing: const Icon(Icons.calendar_today),
+                trailing: Icon(Icons.calendar_today, color: Theme.of(context).primaryColor),
                 onTap: () => _selectDate(context, false),
               ),
               ListTile(
                 title: Text(_expiryDate == null
                     ? 'Select Expiry Date'
                     : 'Expiry Date: ${DateFormat('yyyy-MM-dd').format(_expiryDate!)}'),
-                trailing: const Icon(Icons.calendar_today, color: Colors.cyan),
+                trailing: Icon(Icons.calendar_today, color: Theme.of(context).primaryColor),
                  tileColor: _expiryDate == null ? Colors.deepOrange.withValues(alpha: 0.1) : null,
                 onTap: () => _selectDate(context, true),
               ),
@@ -170,8 +273,8 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
                 onPressed: _saveDocument,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: const Color(0xFF00FFFF),
-                  foregroundColor: Colors.black,
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 ),
                 child: const Text('SAVE DOCUMENT', style: TextStyle(fontWeight: FontWeight.bold)),
               ),

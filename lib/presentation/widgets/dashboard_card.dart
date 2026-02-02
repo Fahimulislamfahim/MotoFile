@@ -27,12 +27,12 @@ class DashboardCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E1E1E),
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white10),
+          border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -44,8 +44,8 @@ class DashboardCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.titleMedium?.color,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -55,7 +55,7 @@ class DashboardCard extends StatelessWidget {
               children: [
                 Text(
                   'Expires: $expiryDate',
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 12),
                 ),
                 const SizedBox(height: 8),
                 Container(
