@@ -180,8 +180,8 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add Document')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
         child: Form(
           key: _formKey,
           child: Column(
@@ -242,8 +242,8 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
                       ),
                     ),
                   ),
-                  ],
-                ),
+                ],
+              ),
               if (_pickedFile != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0),
@@ -265,20 +265,27 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
                     ? 'Select Expiry Date'
                     : 'Expiry Date: ${DateFormat('yyyy-MM-dd').format(_expiryDate!)}'),
                 trailing: Icon(Icons.calendar_today, color: Theme.of(context).primaryColor),
-                 tileColor: _expiryDate == null ? Colors.deepOrange.withValues(alpha: 0.1) : null,
+                tileColor: _expiryDate == null ? Colors.deepOrange.withValues(alpha: 0.1) : null,
                 onTap: () => _selectDate(context, true),
               ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: _saveDocument,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                ),
-                child: const Text('SAVE DOCUMENT', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
             ],
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _saveDocument,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              elevation: 4,
+            ),
+            child: const Text('SAVE DOCUMENT', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ),
       ),
