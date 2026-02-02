@@ -30,8 +30,8 @@ CREATE TABLE documents (
   id $idType,
   doc_type $textType,
   file_path $textType,
-  issue_date $textType,
-  expiry_date $textType,
+  issue_date TEXT,
+  expiry_date TEXT,
   status $textType
 )
 ''');

@@ -2,16 +2,16 @@ class Document {
   final int? id;
   final String docType;
   final String filePath;
-  final String issueDate;
-  final String expiryDate;
+  final String? issueDate;
+  final String? expiryDate;
   final String status;
 
   Document({
     this.id,
     required this.docType,
     required this.filePath,
-    required this.issueDate,
-    required this.expiryDate,
+    this.issueDate,
+    this.expiryDate,
     required this.status,
   });
 

@@ -37,8 +37,10 @@ class NotificationService {
   Future<void> scheduleExpiryNotification({
     required int id,
     required String title,
-    required DateTime expiryDate,
+    required DateTime? expiryDate,
   }) async {
+    if (expiryDate == null) return;
+
     // Schedule notification 7 days before expiry
     final scheduledDate7Days = expiryDate.subtract(const Duration(days: 7));
     if (scheduledDate7Days.isAfter(DateTime.now())) {

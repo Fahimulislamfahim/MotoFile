@@ -85,8 +85,8 @@ class _HomeScreenState extends State<HomeScreen> {
       orElse: () => Document(
         docType: type,
         filePath: '',
-        issueDate: '-',
-        expiryDate: '-',
+        issueDate: null,
+        expiryDate: null,
         status: 'Missing',
       ),
     );

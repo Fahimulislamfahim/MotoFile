@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class DashboardCard extends StatelessWidget {
   final String title;
-  final String expiryDate;
+  final String? expiryDate;
   final String status;
   final VoidCallback onTap;
 
@@ -54,7 +54,7 @@ class DashboardCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Expires: $expiryDate',
+                  expiryDate != null ? 'Expires: $expiryDate' : 'No Expiry Date',
                   style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 12),
                 ),
                 const SizedBox(height: 8),

@@ -58,9 +58,78 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
     );
 
     if (result != null) {
+      final file = File(result.files.single.path!);
       setState(() {
-        _pickedFile = File(result.files.single.path!);
+        _pickedFile = file;
       });
+
+      // Auto-scan PDF
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: Theme.of(context).cardColor,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(height: 20),
+                Text(
+                  'Scanning PDF for dates...',
+                   style: TextStyle(
+                     color: Theme.of(context).textTheme.bodyLarge?.color,
+                     fontWeight: FontWeight.w500
+                   )
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Please wait while we extract info.',
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                    fontSize: 12
+                  )
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      try {
+        final ocrService = OCRService();
+        final results = await ocrService.scanPdf(file);
+        
+        if (mounted) {
+          Navigator.pop(context); // Close loading
+          setState(() {
+            if (results['issueDate'] != null) _issueDate = results['issueDate'];
+            if (results['expiryDate'] != null) _expiryDate = results['expiryDate'];
+          });
+
+          if (results['issueDate'] != null || results['expiryDate'] != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Found dates: ${results['expiryDate'] != null ? "Expiry: ${DateFormat('dd-MMM-yyyy').format(results['expiryDate']!)}" : ""} ')),
+            );
+          } else {
+             // Debugging help: Show what was seen
+             showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text("No Dates Detected"),
+                  content: SingleChildScrollView(
+                    child: Text("Could not find dates automatically. Here is the text we saw:\n\n${results['rawText'] ?? 'No text extracted'}", style: const TextStyle(fontSize: 10)),
+                  ),
+                  actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("OK"))],
+                )
+             );
+          }
+        }
+      } catch (e) {
+        if (mounted) Navigator.pop(context);
+        print('Error scanning PDF: $e');
+      }
     }
   }
 
@@ -68,7 +137,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
+      firstDate: DateTime(1900),
       lastDate: DateTime(2100),
     );
     if (picked != null) {
@@ -83,6 +152,9 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
   }
 
   Future<void> _scanDocument() async {
+    // ... existing camera scan logic (unchanged for now, but could be unified) ...
+    // keeping it simple as user asked for PDF upload detection specificallly
+    // Reuse existing implementation but verify it handles nullable types compatible variables
     final picker = ImagePicker();
     final image = await picker.pickImage(source: ImageSource.camera);
     
@@ -121,26 +193,28 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
           );
          }
       } finally {
-        ocrService.dispose();
+        // ocrService.dispose(); // Removed dispose as it was likely closing native resources too aggressively or not needed if service is transient
       }
     }
   }
 
   Future<void> _saveDocument() async {
-    if (_formKey.currentState!.validate() && _pickedFile != null && _expiryDate != null) {
+    if (_formKey.currentState!.validate() && _pickedFile != null) {
       // 1. Save file to app directory
       final appDir = await getApplicationDocumentsDirectory();
       final fileName = '${_selectedType!.replaceAll(" ", "_")}_${DateTime.now().millisecondsSinceEpoch}.pdf';
       final savedFile = await _pickedFile!.copy(path.join(appDir.path, fileName));
 
       // 2. Calculate status
-      final now = DateTime.now();
-      final daysUntilExpiry = _expiryDate!.difference(now).inDays;
       String status = 'Valid';
-      if (daysUntilExpiry < 0) {
-        status = 'Expired';
-      } else if (daysUntilExpiry <= 30) {
-        status = 'Expiring';
+      if (_expiryDate != null) {
+        final now = DateTime.now();
+        final daysUntilExpiry = _expiryDate!.difference(now).inDays;
+        if (daysUntilExpiry < 0) {
+          status = 'Expired';
+        } else if (daysUntilExpiry <= 30) {
+          status = 'Expiring';
+        }
       }
 
       // 3. Save to DB
@@ -148,18 +222,18 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
       final document = Document(
         docType: typeToSave,
         filePath: savedFile.path,
-        issueDate: _issueDate != null ? DateFormat('yyyy-MM-dd').format(_issueDate!) : '-',
-        expiryDate: DateFormat('yyyy-MM-dd').format(_expiryDate!),
+        issueDate: _issueDate != null ? DateFormat('yyyy-MM-dd').format(_issueDate!) : null,
+        expiryDate: _expiryDate != null ? DateFormat('yyyy-MM-dd').format(_expiryDate!) : null,
         status: status,
       );
 
       final id = await DatabaseHelper.instance.create(document);
 
-      // Schedule notification
+      // Schedule notification (only if expiry exists)
       await NotificationService().scheduleExpiryNotification(
         id: id,
         title: typeToSave,
-        expiryDate: _expiryDate!,
+        expiryDate: _expiryDate,
       );
 
       if (mounted) {
@@ -168,10 +242,6 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
     } else if (_pickedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a PDF file')),
-      );
-    } else if (_expiryDate == null) {
-       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an expiry date')),
       );
     }
   }
@@ -262,10 +332,10 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
               ),
               ListTile(
                 title: Text(_expiryDate == null
-                    ? 'Select Expiry Date'
+                    ? 'Select Expiry Date (Optional)'
                     : 'Expiry Date: ${DateFormat('yyyy-MM-dd').format(_expiryDate!)}'),
                 trailing: Icon(Icons.calendar_today, color: Theme.of(context).primaryColor),
-                tileColor: _expiryDate == null ? Colors.deepOrange.withValues(alpha: 0.1) : null,
+                tileColor: null, // Removed warning color since it's now optional
                 onTap: () => _selectDate(context, true),
               ),
             ],
