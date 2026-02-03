@@ -11,6 +11,7 @@ import '../widgets/document_card_view.dart';
 import '../widgets/app_drawer.dart';
 import 'add_document_screen.dart';
 import 'pdf_viewer_screen.dart';
+import 'garage_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<String> _displayTypes = [];
   List<String> _savedOrder = [];
   ViewMode _viewMode = ViewMode.grid;
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -287,68 +289,90 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search documents...',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Theme.of(context).cardColor,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: ['All', 'Expiring Soon', 'Expired', 'Missing'].map((filter) {
-                final isSelected = _filter == filter;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(filter),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        _filter = filter;
-                        _filterDocuments();
-                      });
-                    },
-                    selectedColor: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                    checkmarkColor: Theme.of(context).primaryColor,
-                    backgroundColor: Theme.of(context).cardColor,
-                    labelStyle: TextStyle(
-                      color: isSelected 
-                          ? Theme.of(context).primaryColor 
-                          : Theme.of(context).textTheme.bodyMedium?.color,
+      body: _currentIndex == 0 
+        ? Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search documents...',
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: Theme.of(context).cardColor,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _displayTypes.isEmpty
-                    ? Center(child: Text('No documents found', style: TextStyle(color: Colors.grey[400])))
-                    : _buildDocumentView(),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
+                ),
+              ),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: ['All', 'Expiring Soon', 'Expired', 'Missing'].map((filter) {
+                    final isSelected = _filter == filter;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: FilterChip(
+                        label: Text(filter),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            _filter = filter;
+                            _filterDocuments();
+                          });
+                        },
+                        selectedColor: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                        checkmarkColor: Theme.of(context).primaryColor,
+                        backgroundColor: Theme.of(context).cardColor,
+                        labelStyle: TextStyle(
+                          color: isSelected 
+                              ? Theme.of(context).primaryColor 
+                              : Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _displayTypes.isEmpty
+                        ? Center(child: Text('No documents found', style: TextStyle(color: Colors.grey[400])))
+                        : _buildDocumentView(),
+              ),
+            ],
+          )
+        : const GarageScreen(),
+      floatingActionButton: _currentIndex == 0 ? FloatingActionButton(
         onPressed: () => _navigateToAddDocument(null),
         backgroundColor: Theme.of(context).primaryColor,
         child: const Icon(Icons.add, color: Colors.black),
+      ) : null,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.folder_open),
+            selectedIcon: Icon(Icons.folder),
+            label: 'Documents',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.two_wheeler),
+            selectedIcon: Icon(Icons.motorcycle),
+            label: 'Garage',
+          ),
+        ],
       ),
     );
   }
