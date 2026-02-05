@@ -31,12 +31,25 @@ class _AddEditVehicleScreenState extends State<AddEditVehicleScreen> {
 
   String _selectedType = 'Bike';
   final List<String> _vehicleTypes = ['Bike', 'Car', 'Scooter', 'Truck'];
+  
+  final Map<String, List<String>> _bikeMakes = {
+    'Yamaha': ['FZ V2', 'FZ V3', 'Fazer V2', 'R15 V3', 'MT 15', 'R15 V4', 'FZX', 'Aerox 155', 'RayZR'],
+    'Suzuki': ['Gixxer', 'Gixxer SF', 'Gixxer SF 250', 'Gixxer 250', 'Access 125', 'Burgman Street', 'Hayabusa'],
+    'Honda': ['CBR 150R', 'CB Shine', 'Unicorn', 'Hornet 2.0', 'Activa 6G', 'CBR 650R', 'SP 125'],
+    'Royal Enfield': ['Classic 350', 'Bullet 350', 'Meteor 350', 'Himalayan', 'Interceptor 650', 'Continental GT 650', 'Hunter 350'],
+    'Bajaj': ['Pulsar 150', 'Pulsar NS200', 'Pulsar N160', 'Dominar 400', 'Platina', 'Avenger'],
+    'KTM': ['Duke 125', 'Duke 200', 'Duke 390', 'RC 200', 'RC 390', 'Adventure 390'],
+    'TVS': ['Apache RTR 160', 'Apache RTR 160 4V', 'Apache RR 310', 'Raider 125', 'Jupiter', 'NTorq'],
+    'Hero': ['Splendor Plus', 'Passion Pro', 'XPulse 200', 'Xtreme 160R', 'Pleasure Plus'],
+    'Kawasaki': ['Ninja 300', 'Ninja 400', 'Z900', 'Versys 650', 'Ninja ZX-10R'],
+    'Other': [],
+  };
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.vehicle?.name ?? '');
-    _makeController = TextEditingController(text: widget.vehicle?.make ?? '');
+    _makeController = TextEditingController(text: widget.vehicle?.make ?? 'Yamaha');
     _modelController = TextEditingController(text: widget.vehicle?.model ?? '');
     _yearController = TextEditingController(text: widget.vehicle?.year ?? '');
     _licensePlateController = TextEditingController(text: widget.vehicle?.licensePlate ?? '');
@@ -145,19 +158,69 @@ class _AddEditVehicleScreenState extends State<AddEditVehicleScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: TextFormField(
-                      controller: _makeController,
-                      decoration: const InputDecoration(labelText: 'Make (Yamaha)', border: OutlineInputBorder()),
-                      validator: (value) => value!.isEmpty ? 'Required' : null,
-                    ),
+                    child: _selectedType == 'Bike'
+                      ? DropdownButtonFormField<String>(
+                          value: _bikeMakes.containsKey(_makeController.text) ? _makeController.text : 'Yamaha',
+                          decoration: const InputDecoration(labelText: 'Make', border: OutlineInputBorder()),
+                          items: _bikeMakes.keys.map((make) {
+                            return DropdownMenuItem(value: make, child: Text(make));
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _makeController.text = value!;
+                              _modelController.clear(); // Reset model when make changes
+                            });
+                          },
+                        )
+                      : TextFormField(
+                          controller: _makeController,
+                          decoration: const InputDecoration(labelText: 'Make (Yamaha)', border: OutlineInputBorder()),
+                          validator: (value) => value!.isEmpty ? 'Required' : null,
+                        ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: TextFormField(
-                      controller: _modelController,
-                      decoration: const InputDecoration(labelText: 'Model (R15)', border: OutlineInputBorder()),
-                      validator: (value) => value!.isEmpty ? 'Required' : null,
-                    ),
+                    child: _selectedType == 'Bike'
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              DropdownButtonFormField<String>(
+                                isExpanded: true,
+                                decoration: const InputDecoration(labelText: 'Model', border: OutlineInputBorder()),
+                                value: (_bikeMakes[_makeController.text]?.contains(_modelController.text) ?? false) 
+                                    ? _modelController.text 
+                                    : 'Other',
+                                items: [...(_bikeMakes[_makeController.text] ?? []), 'Other'].map<DropdownMenuItem<String>>((model) {
+                                  return DropdownMenuItem<String>(value: model, child: Text(model));
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (value == 'Other') {
+                                      _modelController.text = ''; // Allow manual entry
+                                      // We need a flag or logic to show text field, but for now sticking to "Other" logic 
+                                      // reused from previous implementation but slightly adjusted.
+                                      // Actually, clearer to simple set text to empty str, which triggers the 'Other' field visibility below
+                                    } else {
+                                      _modelController.text = value!;
+                                    }
+                                  });
+                                },
+                              ),
+                              if (!(_bikeMakes[_makeController.text]?.contains(_modelController.text) ?? false)) ...[
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _modelController,
+                                  decoration: const InputDecoration(labelText: 'Enter Model Name', border: OutlineInputBorder()),
+                                  validator: (value) => value!.isEmpty ? 'Required' : null,
+                                ),
+                              ]
+                            ],
+                          )
+                        : TextFormField(
+                            controller: _modelController,
+                            decoration: const InputDecoration(labelText: 'Model (Civic)', border: OutlineInputBorder()),
+                            validator: (value) => value!.isEmpty ? 'Required' : null,
+                          ),
                   ),
                 ],
               ),

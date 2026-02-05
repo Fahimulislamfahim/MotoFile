@@ -83,59 +83,12 @@ class _GarageScreenState extends State<GarageScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header Card
-              GlassCard(
-                borderRadius: 28,
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLight.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.primaryLight.withOpacity(0.2), width: 2),
-                        boxShadow: [
-                          BoxShadow(color: AppColors.primaryLight.withOpacity(0.2), blurRadius: 20)
-                        ]
-                      ),
-                      child: Icon(
-                        vehicle.type == 'Car' ? Icons.directions_car_rounded : Icons.two_wheeler_rounded,
-                        size: 40,
-                        color: AppColors.primaryLight,
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            vehicle.name,
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${vehicle.make} ${vehicle.model} (${vehicle.year})',
-                            style: TextStyle(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7)),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.edit_rounded),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AddEditVehicleScreen(vehicle: vehicle),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ).animate().slideY(begin: -0.2, end: 0, duration: 500.ms),
+              // Header Card
+              _buildVehicleHeader(context, vehicle),
+              
+              // Extra spacing logic if needed, but the listview handles spacing. Keeping simpler.
+              if (_isPremiumModel(vehicle))
+                 const SizedBox(height: 12),
               
               const SizedBox(height: 24),
 
@@ -289,5 +242,185 @@ class _GarageScreenState extends State<GarageScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildVehicleHeader(BuildContext context, Vehicle vehicle) {
+    // Premium Image Support for specific models
+    // Map format: "Make" : { "Model" : "FileName.png" }
+    final Map<String, Map<String, String>> bikeAssets = {
+      'Yamaha': {
+        'Fazer V2': 'Fazer v2.png',
+        'R15 V3': 'R15 v3.png',
+      },
+      'Suzuki': {
+        'Gixxer SF 250': 'Gixxer Sf 250.png',
+      }
+    };
+
+    String? imageAsset;
+    if (bikeAssets.containsKey(vehicle.make) && bikeAssets[vehicle.make]!.containsKey(vehicle.model)) {
+      imageAsset = 'assets/bike images/${vehicle.make}/${bikeAssets[vehicle.make]![vehicle.model]}';
+    }
+
+    if (imageAsset != null) {
+      return GlassCard(
+        borderRadius: 32,
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                // The Bike Image (Centered)
+                Center(
+                  child: Image.asset(
+                    imageAsset,
+                    height: 180,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(Icons.two_wheeler_rounded, size: 80, color: AppColors.primaryLight.withOpacity(0.5));
+                    },
+                  ).animate().scale(duration: 800.ms, curve: Curves.easeOutBack).fadeIn(),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Vehicle Details
+                Text(
+                  vehicle.name,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryLight,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                  ),
+                  child: Text(
+                    '${vehicle.make} ${vehicle.model} • ${vehicle.year}',
+                     textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14, 
+                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.8),
+                      fontWeight: FontWeight.w500
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            
+            // Edit Button (Top Right)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: IconButton(
+                onPressed: () {
+                   Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddEditVehicleScreen(vehicle: vehicle),
+                    ),
+                  );
+                },
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color:  Theme.of(context).cardColor.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.edit_rounded, size: 20),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ).animate().slideY(begin: -0.2, end: 0, duration: 600.ms);
+    }
+
+    // Standard Header for other vehicles
+    return GlassCard(
+      borderRadius: 28,
+      padding: const EdgeInsets.all(20),
+      child: Stack(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLight.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.primaryLight.withOpacity(0.2), width: 2),
+                  boxShadow: [
+                    BoxShadow(color: AppColors.primaryLight.withOpacity(0.2), blurRadius: 20)
+                  ]
+                ),
+                child: Icon(
+                  vehicle.type == 'Car' ? Icons.directions_car_rounded : Icons.two_wheeler_rounded,
+                  size: 40,
+                  color: AppColors.primaryLight,
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      vehicle.name,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${vehicle.make} ${vehicle.model} (${vehicle.year})',
+                      style: TextStyle(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          
+          // Edit Button (Absolute Top Right)
+          Positioned(
+            top: 0,
+            right: 0,
+            child: IconButton(
+              icon: const Icon(Icons.edit_rounded),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddEditVehicleScreen(vehicle: vehicle),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    ).animate().slideY(begin: -0.2, end: 0, duration: 500.ms);
+  }
+
+  bool _isPremiumModel(Vehicle vehicle) {
+    // Map format: "Make" : { "Model" : "FileName.png" }
+    // We can reuse the same map or just check existence
+     final Map<String, Map<String, String>> bikeAssets = {
+      'Yamaha': {
+        'Fazer V2': 'Fazer v2.png',
+        'R15 V3': 'R15 v3.png',
+      },
+      'Suzuki': {
+        'Gixxer SF 250': 'Gixxer Sf 250.png',
+      }
+    };
+    
+    return bikeAssets.containsKey(vehicle.make) && bikeAssets[vehicle.make]!.containsKey(vehicle.model);
   }
 }

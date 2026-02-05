@@ -24,6 +24,12 @@ class AppTheme {
       centerTitle: false,
       foregroundColor: AppColors.textPrimaryLight,
     ),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: ZoomPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      },
+    ),
     useMaterial3: true,
   );
 
@@ -47,6 +53,12 @@ class AppTheme {
       elevation: 0,
       centerTitle: false,
       foregroundColor: AppColors.textPrimaryDark,
+    ),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: ZoomPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      },
     ),
     useMaterial3: true,
   );

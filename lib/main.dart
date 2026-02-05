@@ -34,6 +34,12 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeService.themeMode,
+          themeAnimationDuration: const Duration(milliseconds: 500),
+          themeAnimationCurve: Curves.easeInOut,
+          scrollBehavior: const MaterialScrollBehavior().copyWith(
+            physics: const BouncingScrollPhysics(),
+            scrollbars: false,
+          ),
           home: const SplashScreen(),
         );
       },
