@@ -138,12 +138,12 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
+            color: Theme.of(context).primaryColor.withOpacity(0.5),
             blurRadius: 50,
             spreadRadius: 5,
           ),
           BoxShadow(
-            color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+            color: Theme.of(context).primaryColor.withOpacity(0.3),
             blurRadius: 100,
             spreadRadius: 15,
           ),
@@ -158,7 +158,7 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
             end: Alignment.bottomRight,
             colors: [
               Theme.of(context).primaryColor,
-              Theme.of(context).primaryColor.withValues(alpha: 0.7),
+              Theme.of(context).primaryColor.withOpacity(0.7),
               Theme.of(context).primaryColor,
             ],
             stops: const [0.0, 0.5, 1.0],
@@ -212,25 +212,25 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
               end: Alignment.bottomRight,
               colors: isDark
                   ? [
-                      Colors.white.withValues(alpha: 0.1),
-                      Colors.white.withValues(alpha: 0.05),
+                      Colors.white.withOpacity(0.1),
+                      Colors.white.withOpacity(0.05),
                     ]
                   : [
-                      Colors.white.withValues(alpha: 0.95),
-                      Colors.white.withValues(alpha: 0.7),
+                      Colors.white.withOpacity(0.95),
+                      Colors.white.withOpacity(0.7),
                     ],
             ),
             border: Border.all(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.2)
-                  : Colors.white.withValues(alpha: 0.8),
+                  ? Colors.white.withOpacity(0.2)
+                  : Colors.white.withOpacity(0.8),
               width: 2,
             ),
             boxShadow: [
               BoxShadow(
                 color: isDark
-                    ? Colors.black.withValues(alpha: 0.4)
-                    : Colors.black.withValues(alpha: 0.08),
+                    ? Colors.black.withOpacity(0.4)
+                    : Colors.black.withOpacity(0.08),
                 blurRadius: 40,
                 offset: const Offset(0, 20),
               ),
@@ -244,8 +244,8 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
                     colors: [
-                      Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                      Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                      Theme.of(context).primaryColor.withOpacity(0.3),
+                      Theme.of(context).primaryColor.withOpacity(0.1),
                     ],
                   ),
                 ),
@@ -269,7 +269,7 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
                 shaderCallback: (bounds) => LinearGradient(
                   colors: [
                     Theme.of(context).primaryColor,
-                    Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                    Theme.of(context).primaryColor.withOpacity(0.8),
                   ],
                 ).createShader(bounds),
                 child: Text(
@@ -288,13 +288,13 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                      Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                      Theme.of(context).primaryColor.withOpacity(0.3),
+                      Theme.of(context).primaryColor.withOpacity(0.2),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(25),
                   border: Border.all(
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
+                    color: Theme.of(context).primaryColor.withOpacity(0.4),
                     width: 1.5,
                   ),
                 ),
@@ -335,19 +335,19 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
             color: isDark
-                ? Colors.white.withValues(alpha: 0.06)
-                : Colors.white.withValues(alpha: 0.8),
+                ? Colors.white.withOpacity(0.06)
+                : Colors.white.withOpacity(0.8),
             border: Border.all(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.12)
-                  : Colors.white.withValues(alpha: 0.6),
+                  ? Colors.white.withOpacity(0.12)
+                  : Colors.white.withOpacity(0.6),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
                 color: isDark
-                    ? Colors.black.withValues(alpha: 0.3)
-                    : Colors.black.withValues(alpha: 0.05),
+                    ? Colors.black.withOpacity(0.3)
+                    : Colors.black.withOpacity(0.05),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -362,8 +362,8 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                          Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                          Theme.of(context).primaryColor.withOpacity(0.3),
+                          Theme.of(context).primaryColor.withOpacity(0.1),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(12),
@@ -416,7 +416,7 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
       children: [
         Icon(
           icon,
-          color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
+          color: Theme.of(context).primaryColor.withOpacity(0.7),
           size: 20,
         ),
         const SizedBox(width: 12),

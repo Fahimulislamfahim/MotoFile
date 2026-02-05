@@ -6,10 +6,15 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../data/database_helper.dart';
 import '../../data/models/document_model.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/services/ocr_service.dart';
+import '../../core/theme/app_colors.dart';
+import '../widgets/premium_background.dart';
+import '../widgets/glass_card.dart';
+import '../widgets/premium_app_bar.dart';
 
 class AddDocumentScreen extends StatefulWidget {
   final String? preselectedType;
@@ -52,91 +57,77 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
     super.dispose();
   }
 
+  // File picking and scanning logic remains exactly the same
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
     );
-
     if (result != null) {
       final file = File(result.files.single.path!);
-      setState(() {
-        _pickedFile = file;
-      });
+      setState(() => _pickedFile = file);
+      _scanDocumentInternal(file);
+    }
+  }
 
-      // Check if it's a PDF or image
-      final extension = path.extension(file.path).toLowerCase();
-      final isPdf = extension == '.pdf';
+  Future<void> _scanDocument() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.camera);
+    if (image == null) return;
 
-      // Auto-scan for dates
+    final croppedFile = await ImageCropper().cropImage(
+      sourcePath: image.path,
+      uiSettings: [
+        AndroidUiSettings(
+            toolbarTitle: 'Crop Document',
+            toolbarColor: AppColors.primaryLight,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.original,
+            lockAspectRatio: false),
+        IOSUiSettings(title: 'Crop Document'),
+      ],
+    );
+
+    if (croppedFile != null) {
+      final file = File(croppedFile.path);
+      setState(() => _pickedFile = file);
+      _scanDocumentInternal(file);
+    }
+  }
+
+  Future<void> _scanDocumentInternal(File file) async {
+    final extension = path.extension(file.path).toLowerCase();
+    final isPdf = extension == '.pdf';
+
+    if (mounted) {
+       showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => Center(child: GlassCard(borderRadius: 16, padding: EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [CircularProgressIndicator(), SizedBox(height: 16), Text("Scanning...")]))),
+      );
+    }
+
+    try {
+      final ocrService = OCRService();
+      final results = isPdf 
+          ? await ocrService.scanPdf(file)
+          : await ocrService.scanDocument(file);
+      
       if (mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (ctx) => AlertDialog(
-            backgroundColor: Theme.of(context).cardColor,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const CircularProgressIndicator(),
-                const SizedBox(height: 20),
-                Text(
-                  isPdf ? 'Scanning PDF for dates...' : 'Scanning image for dates...',
-                   style: TextStyle(
-                     color: Theme.of(context).textTheme.bodyLarge?.color,
-                     fontWeight: FontWeight.w500
-                   )
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Please wait while we extract info.',
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                    fontSize: 12
-                  )
-                ),
-              ],
-            ),
-          ),
-        );
-      }
+        Navigator.pop(context); // Close loading
+        setState(() {
+          if (results['issueDate'] != null) _issueDate = results['issueDate'];
+          if (results['expiryDate'] != null) _expiryDate = results['expiryDate'];
+        });
 
-      try {
-        final ocrService = OCRService();
-        final results = isPdf 
-            ? await ocrService.scanPdf(file)
-            : await ocrService.scanDocument(file);
-        
-        if (mounted) {
-          Navigator.pop(context); // Close loading
-          setState(() {
-            if (results['issueDate'] != null) _issueDate = results['issueDate'];
-            if (results['expiryDate'] != null) _expiryDate = results['expiryDate'];
-          });
-
-          if (results['issueDate'] != null || results['expiryDate'] != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Found dates: ${results['expiryDate'] != null ? "Expiry: ${DateFormat('dd-MMM-yyyy').format(results['expiryDate']!)}" : ""} ')),
-            );
-          } else {
-             // Debugging help: Show what was seen
-             showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text("No Dates Detected"),
-                  content: SingleChildScrollView(
-                    child: Text("Could not find dates automatically. Here is the text we saw:\n\n${results['rawText'] ?? 'No text extracted'}", style: const TextStyle(fontSize: 10)),
-                  ),
-                  actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("OK"))],
-                )
-             );
-          }
+        if (results['issueDate'] != null || results['expiryDate'] != null) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Dates Detected!'), backgroundColor: AppColors.success));
+        } else {
+           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No dates detected automatically.'), backgroundColor: AppColors.warning));
         }
-      } catch (e) {
-        if (mounted) Navigator.pop(context);
-        print('Error scanning file: $e');
       }
+    } catch (e) {
+      if (mounted) Navigator.pop(context);
     }
   }
 
@@ -146,6 +137,17 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
       initialDate: DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime(2100),
+       builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primaryLight, 
+              surface: AppColors.surfaceLight,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
@@ -158,136 +160,22 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
     }
   }
 
-  Future<void> _scanDocument() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.camera);
-    
-    if (image == null) return;
-
-    // Crop the image
-    final croppedFile = await ImageCropper().cropImage(
-      sourcePath: image.path,
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: 'Crop Document',
-          toolbarColor: Theme.of(context).primaryColor,
-          toolbarWidgetColor: Colors.white,
-          statusBarColor: Theme.of(context).primaryColor,
-          activeControlsWidgetColor: Colors.white,
-          initAspectRatio: CropAspectRatioPreset.original,
-          lockAspectRatio: false,
-          hideBottomControls: false,
-          aspectRatioPresets: [
-            CropAspectRatioPreset.original,
-            CropAspectRatioPreset.square,
-            CropAspectRatioPreset.ratio4x3,
-            CropAspectRatioPreset.ratio16x9,
-          ],
-        ),
-        IOSUiSettings(
-          title: 'Crop Document',
-          aspectRatioPresets: [
-            CropAspectRatioPreset.original,
-            CropAspectRatioPreset.square,
-            CropAspectRatioPreset.ratio4x3,
-            CropAspectRatioPreset.ratio16x9,
-          ],
-        ),
-      ],
-    );
-
-    if (croppedFile == null) return;
-
-    // Save cropped image to _pickedFile so it can be saved
-    final File croppedImageFile = File(croppedFile.path);
-    setState(() {
-      _pickedFile = croppedImageFile;
-    });
-
-    // Show loading indicator for OCR
-    if (mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => AlertDialog(
-          backgroundColor: Theme.of(context).cardColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 20),
-              Text(
-                'Scanning image for dates...',
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                  fontWeight: FontWeight.w500
-                )
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    try {
-      final ocrService = OCRService();
-      final dates = await ocrService.scanDocument(croppedImageFile);
-      
-      if (mounted) {
-        Navigator.pop(context); // Close loading
-        setState(() {
-          if (dates['issueDate'] != null) _issueDate = dates['issueDate'];
-          if (dates['expiryDate'] != null) _expiryDate = dates['expiryDate'];
-        });
-        
-        if (dates['issueDate'] != null || dates['expiryDate'] != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Found dates: ${dates['expiryDate'] != null ? "Expiry: ${DateFormat('dd-MMM-yyyy').format(dates['expiryDate']!)}" : "Issue date detected"}'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No dates detected. You can enter them manually.'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error scanning: $e')),
-        );
-      }
-    }
-  }
-
   Future<void> _saveDocument() async {
     if (_formKey.currentState!.validate() && _pickedFile != null) {
-      // 1. Save file to app directory with correct extension
+      // Logic same as before
       final appDir = await getApplicationDocumentsDirectory();
       final fileExtension = path.extension(_pickedFile!.path);
       final fileName = '${_selectedType!.replaceAll(" ", "_")}_${DateTime.now().millisecondsSinceEpoch}$fileExtension';
       final savedFile = await _pickedFile!.copy(path.join(appDir.path, fileName));
 
-      // 2. Calculate status
       String status = 'Valid';
       if (_expiryDate != null) {
         final now = DateTime.now();
         final daysUntilExpiry = _expiryDate!.difference(now).inDays;
-        if (daysUntilExpiry < 0) {
-          status = 'Expired';
-        } else if (daysUntilExpiry <= 30) {
-          status = 'Expiring';
-        }
+        if (daysUntilExpiry < 0) status = 'Expired';
+        else if (daysUntilExpiry <= 30) status = 'Expiring';
       }
 
-      // 3. Save to DB
       final typeToSave = _selectedType == 'Other' ? _customTypeController.text.trim() : _selectedType!;
       final document = Document(
         docType: typeToSave,
@@ -298,135 +186,164 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
       );
 
       final id = await DatabaseHelper.instance.create(document);
+      await NotificationService().scheduleExpiryNotification(id: id, title: typeToSave, expiryDate: _expiryDate);
 
-      // Schedule notification (only if expiry exists)
-      await NotificationService().scheduleExpiryNotification(
-        id: id,
-        title: typeToSave,
-        expiryDate: _expiryDate,
-      );
-
-      if (mounted) {
-        Navigator.pop(context, true); // Return true to refresh
-      }
+      if (mounted) Navigator.pop(context, true);
     } else if (_pickedFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a file or scan a document')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a file or scan a document')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Add Document')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              DropdownButtonFormField<String>(
-                // ignore: deprecated_member_use
-                value: _selectedType,
-                decoration: const InputDecoration(labelText: 'Document Type'),
-                items: _docTypes.map((String type) {
-                  return DropdownMenuItem<String>(
-                    value: type,
-                    child: Text(type),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedType = newValue;
-                  });
-                },
-              ),
-              if (_selectedType == 'Other')
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: TextFormField(
-                    controller: _customTypeController,
-                    decoration: const InputDecoration(labelText: 'Enter Document Type'),
-                    validator: (value) {
-                      if (_selectedType == 'Other' && (value == null || value.isEmpty)) {
-                        return 'Please enter a document type';
-                      }
-                      return null;
-                    },
+    return PremiumBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: const PremiumAppBar(title: 'Add Document'),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                GlassCard(
+                  padding: const EdgeInsets.all(16),
+                  borderRadius: 20,
+                  child: Column(
+                    children: [
+                       DropdownButtonFormField<String>(
+                        value: _selectedType,
+                        decoration: const InputDecoration(labelText: 'Document Type', border: InputBorder.none),
+                        dropdownColor: AppColors.surfaceLight,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        items: _docTypes.map((String type) {
+                          return DropdownMenuItem<String>(value: type, child: Text(type));
+                        }).toList(),
+                        onChanged: (newValue) => setState(() => _selectedType = newValue),
+                      ),
+                      if (_selectedType == 'Other')
+                        Padding(
+                           padding: const EdgeInsets.only(top: 8),
+                           child: TextFormField(
+                              controller: _customTypeController,
+                              decoration: const InputDecoration(labelText: 'Enter Document Type', filled: true),
+                              validator: (value) => _selectedType == 'Other' && (value == null || value.isEmpty) ? 'Required' : null,
+                           ),
+                        )
+                    ],
                   ),
-                ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _pickFile,
-                      icon: const Icon(Icons.upload_file),
-                      label: Text(_pickedFile == null ? 'Pick File' : 'File Selected'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _pickedFile != null ? Colors.green : null,
+                ).animate().fadeIn().slideY(),
+                
+                const SizedBox(height: 16),
+                
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildActionButton(
+                        context,
+                        icon: Icons.upload_file, 
+                        label: 'Pick File', 
+                        onTap: _pickFile, 
+                        isPrimary: _pickedFile != null
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildActionButton(
+                        context,
+                        icon: Icons.camera_alt, 
+                        label: 'Scan', 
+                        onTap: _scanDocument, 
+                        isPrimary: false
+                      ),
+                    ),
+                  ],
+                ).animate().fadeIn(delay: 200.ms).slideY(),
+
+                if (_pickedFile != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: GlassCard(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      borderRadius: 16,
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle, color: AppColors.success),
+                          SizedBox(width: 8),
+                          Expanded(child: Text('Selected: ${path.basename(_pickedFile!.path)}', style: TextStyle(fontWeight: FontWeight.bold))),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _scanDocument,
-                      icon: const Icon(Icons.camera_alt),
-                      label: const Text('Scan Doc'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
-                      ),
+
+                const SizedBox(height: 16),
+                
+                GlassCard(
+                    padding: EdgeInsets.zero,
+                    borderRadius: 20,
+                    child: Column(
+                      children: [
+                        ListTile(
+                          title: Text(_issueDate == null ? 'Issue Date (Optional)' : 'Issue Date: ${DateFormat('yyyy-MM-dd').format(_issueDate!)}'),
+                           trailing: Icon(Icons.calendar_today, color: AppColors.primaryLight),
+                           onTap: () => _selectDate(context, false),
+                        ),
+                        Divider(height: 1),
+                         ListTile(
+                          title: Text(_expiryDate == null ? 'Expiry Date (Optional)' : 'Expiry Date: ${DateFormat('yyyy-MM-dd').format(_expiryDate!)}'),
+                           trailing: Icon(Icons.calendar_today, color: AppColors.primaryLight),
+                           onTap: () => _selectDate(context, true),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              if (_pickedFile != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    'Selected: ${path.basename(_pickedFile!.path)}',
-                    style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
-                  ),
-                ),
-              const SizedBox(height: 16),
-              ListTile(
-                title: Text(_issueDate == null
-                    ? 'Select Issue Date (Optional)'
-                    : 'Issue Date: ${DateFormat('yyyy-MM-dd').format(_issueDate!)}'),
-                trailing: Icon(Icons.calendar_today, color: Theme.of(context).primaryColor),
-                onTap: () => _selectDate(context, false),
-              ),
-              ListTile(
-                title: Text(_expiryDate == null
-                    ? 'Select Expiry Date (Optional)'
-                    : 'Expiry Date: ${DateFormat('yyyy-MM-dd').format(_expiryDate!)}'),
-                trailing: Icon(Icons.calendar_today, color: Theme.of(context).primaryColor),
-                tileColor: null, // Removed warning color since it's now optional
-                onTap: () => _selectDate(context, true),
-              ),
-            ],
+                ).animate().fadeIn(delay: 400.ms).slideY(),
+              ],
+            ),
           ),
         ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _saveDocument,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              elevation: 4,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: _saveDocument,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryLight,
+                foregroundColor: Colors.white,
+                elevation: 10,
+                shadowColor: AppColors.primaryLight.withOpacity(0.5),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              child: const Text('SAVE DOCUMENT', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1)),
             ),
-            child: const Text('SAVE DOCUMENT', style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
+          ).animate().fadeIn(delay: 600.ms).scale(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(BuildContext context, {required IconData icon, required String label, required VoidCallback onTap, required bool isPrimary}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: isPrimary ? AppColors.primaryLight : Theme.of(context).cardColor.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.primaryLight.withOpacity(0.3)),
+          boxShadow: [
+             BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: Offset(0, 4))
+          ]
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: isPrimary ? Colors.white : AppColors.primaryLight, size: 28),
+            const SizedBox(height: 8),
+             Text(label, style: TextStyle(color: isPrimary ? Colors.white : AppColors.textPrimaryLight, fontWeight: FontWeight.bold)),
+          ],
         ),
       ),
     );

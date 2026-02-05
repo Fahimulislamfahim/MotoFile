@@ -1,52 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'app_colors.dart';
 
 class AppTheme {
-  static const Color primaryColor = Color(0xFF00FFFF);
-
   static final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
-    primaryColor: primaryColor,
-    scaffoldBackgroundColor: Colors.grey[100],
+    primaryColor: AppColors.primaryLight,
+    scaffoldBackgroundColor: AppColors.backgroundLight,
     colorScheme: const ColorScheme.light(
-      primary: primaryColor,
-      secondary: primaryColor,
-      surface: Colors.white,
-      onSurface: Colors.black,
+      primary: AppColors.primaryLight,
+      secondary: AppColors.accentLight,
+      surface: AppColors.surfaceLight,
+      onSurface: AppColors.textPrimaryLight,
+      error: AppColors.error,
+    ),
+    textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme).apply(
+      bodyColor: AppColors.textPrimaryLight,
+      displayColor: AppColors.textPrimaryLight,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.white,
-      foregroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       elevation: 0,
-    ),
-    cardColor: Colors.white,
-    textTheme: const TextTheme(
-      bodyLarge: TextStyle(color: Colors.black),
-      bodyMedium: TextStyle(color: Colors.black87),
-      titleMedium: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+      centerTitle: false,
+      foregroundColor: AppColors.textPrimaryLight,
     ),
     useMaterial3: true,
   );
 
   static final ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
-    primaryColor: primaryColor, // Keep cyan as primary color
-    scaffoldBackgroundColor: const Color(0xFF121212),
+    primaryColor: AppColors.primaryDark,
+    scaffoldBackgroundColor: AppColors.backgroundDark,
     colorScheme: const ColorScheme.dark(
-      primary: primaryColor,
-      secondary: primaryColor,
-      surface: Color(0xFF1E1E1E),
-      onSurface: Colors.white,
+      primary: AppColors.primaryDark,
+      secondary: AppColors.accentDark,
+      surface: AppColors.surfaceDark,
+      onSurface: AppColors.textPrimaryDark,
+      error: AppColors.error,
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFF121212),
-      foregroundColor: Colors.white,
+    textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).apply(
+      bodyColor: AppColors.textPrimaryDark,
+      displayColor: AppColors.textPrimaryDark,
+    ),
+     appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.transparent,
       elevation: 0,
-    ),
-    cardColor: const Color(0xFF1E1E1E),
-    textTheme: const TextTheme(
-      bodyLarge: TextStyle(color: Colors.white),
-      bodyMedium: TextStyle(color: Colors.white70),
-      titleMedium: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      centerTitle: false,
+      foregroundColor: AppColors.textPrimaryDark,
     ),
     useMaterial3: true,
   );

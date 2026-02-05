@@ -122,12 +122,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 gradient: LinearGradient(
                   colors: [
                     Theme.of(context).primaryColor,
-                    Theme.of(context).primaryColor.withValues(alpha: 0.5),
+                    Theme.of(context).primaryColor.withOpacity(0.5),
                   ],
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                    color: Theme.of(context).primaryColor.withOpacity(0.3),
                     blurRadius: 20,
                     spreadRadius: 5,
                   ),
@@ -229,19 +229,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             color: isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.white.withValues(alpha: 0.7),
+                ? Colors.white.withOpacity(0.05)
+                : Colors.white.withOpacity(0.7),
             border: Border.all(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.white.withValues(alpha: 0.5),
+                  ? Colors.white.withOpacity(0.1)
+                  : Colors.white.withOpacity(0.5),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
                 color: isDark
-                    ? Colors.black.withValues(alpha: 0.2)
-                    : Colors.black.withValues(alpha: 0.1),
+                    ? Colors.black.withOpacity(0.2)
+                    : Colors.black.withOpacity(0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -300,7 +300,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                        color: Theme.of(context).primaryColor.withOpacity(0.3),
                       ),
                     ),
                     focusedBorder: UnderlineInputBorder(

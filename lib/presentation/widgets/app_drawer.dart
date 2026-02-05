@@ -52,12 +52,12 @@ class _AppDrawerState extends State<AppDrawer> {
                 end: Alignment.bottomRight,
                 colors: isDark
                     ? [
-                        const Color(0xFF1E1E1E).withValues(alpha: 0.9),
-                        const Color(0xFF121212).withValues(alpha: 0.95),
+                        const Color(0xFF1E1E1E).withOpacity(0.9),
+                        const Color(0xFF121212).withOpacity(0.95),
                       ]
                     : [
-                        Colors.white.withValues(alpha: 0.9),
-                        Colors.grey[100]!.withValues(alpha: 0.95),
+                        Colors.white.withOpacity(0.9),
+                        Colors.grey[100]!.withOpacity(0.95),
                       ],
               ),
             ),
@@ -133,8 +133,8 @@ class _AppDrawerState extends State<AppDrawer> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Theme.of(context).primaryColor.withValues(alpha: 0.3),
-            Theme.of(context).primaryColor.withValues(alpha: 0.1),
+            Theme.of(context).primaryColor.withOpacity(0.3),
+            Theme.of(context).primaryColor.withOpacity(0.1),
           ],
         ),
       ),
@@ -148,7 +148,7 @@ class _AppDrawerState extends State<AppDrawer> {
               gradient: LinearGradient(
                 colors: [
                   Theme.of(context).primaryColor,
-                  Theme.of(context).primaryColor.withValues(alpha: 0.5),
+                  Theme.of(context).primaryColor.withOpacity(0.5),
                 ],
               ),
             ),

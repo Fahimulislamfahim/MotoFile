@@ -1,7 +1,11 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme/theme_service.dart';
+import '../../core/theme/app_colors.dart';
+import '../widgets/premium_background.dart';
+import '../widgets/glass_card.dart';
+import '../widgets/premium_app_bar.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -18,147 +22,105 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final themeService = Provider.of<ThemeService>(context);
     final isDark = themeService.isDarkMode;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        elevation: 0,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          const SizedBox(height: 8),
-          Text(
-            'Appearance',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).primaryColor,
-                  fontWeight: FontWeight.bold,
+    return PremiumBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: const PremiumAppBar(title: 'Settings'),
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            const SizedBox(height: 8),
+            _buildSectionHeader(context, 'Appearance'),
+            const SizedBox(height: 12),
+            GlassCard(
+              padding: EdgeInsets.zero,
+              borderRadius: 20,
+              child: _buildSettingTile(
+                context,
+                icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                title: 'Theme',
+                subtitle: isDark ? 'Dark Mode' : 'Light Mode',
+                trailing: Switch.adaptive(
+                  value: isDark,
+                  onChanged: (value) {
+                    themeService.toggleTheme();
+                  },
+                  activeColor: AppColors.primaryLight,
                 ),
-          ),
-          const SizedBox(height: 12),
-          _buildGlassCard(
-            context,
-            isDark,
-            child: _buildSettingTile(
-              context,
-              icon: isDark ? Icons.light_mode : Icons.dark_mode,
-              title: 'Theme',
-              subtitle: isDark ? 'Dark Mode' : 'Light Mode',
-              trailing: Switch(
-                value: isDark,
-                onChanged: (value) {
-                  themeService.toggleTheme();
-                },
-                activeColor: Theme.of(context).primaryColor,
               ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Notifications',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).primaryColor,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 12),
-          _buildGlassCard(
-            context,
-            isDark,
-            child: _buildSettingTile(
-              context,
-              icon: Icons.notifications_outlined,
-              title: 'Push Notifications',
-              subtitle: _notificationsEnabled ? 'Enabled' : 'Disabled',
-              trailing: Switch(
-                value: _notificationsEnabled,
-                onChanged: (value) {
-                  setState(() {
-                    _notificationsEnabled = value;
-                  });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Notifications ${value ? 'enabled' : 'disabled'}',
-                      ),
-                    ),
-                  );
-                },
-                activeColor: Theme.of(context).primaryColor,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'About',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).primaryColor,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 12),
-          _buildGlassCard(
-            context,
-            isDark,
-            child: Column(
-              children: [
-                _buildSettingTile(
-                  context,
-                  icon: Icons.info_outline,
-                  title: 'App Version',
-                  subtitle: '1.0.0',
-                ),
-                const Divider(height: 1),
-                _buildSettingTile(
-                  context,
-                  icon: Icons.description_outlined,
-                  title: 'Terms of Service',
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
+            ).animate().fadeIn().slideX(),
+            const SizedBox(height: 24),
+            _buildSectionHeader(context, 'Notifications'),
+            const SizedBox(height: 12),
+            GlassCard(
+              padding: EdgeInsets.zero,
+              borderRadius: 20,
+              child: _buildSettingTile(
+                context,
+                icon: Icons.notifications_active_rounded,
+                title: 'Push Notifications',
+                subtitle: _notificationsEnabled ? 'Enabled' : 'Disabled',
+                trailing: Switch.adaptive(
+                  value: _notificationsEnabled,
+                  onChanged: (value) {
+                    setState(() {
+                      _notificationsEnabled = value;
+                    });
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Terms of Service coming soon!')),
+                      SnackBar(content: Text('Notifications ${value ? 'enabled' : 'disabled'}')),
                     );
                   },
+                  activeColor: AppColors.primaryLight,
                 ),
-                const Divider(height: 1),
-                _buildSettingTile(
-                  context,
-                  icon: Icons.privacy_tip_outlined,
-                  title: 'Privacy Policy',
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Privacy Policy coming soon!')),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ).animate().fadeIn(delay: 200.ms).slideX(),
+            const SizedBox(height: 24),
+            _buildSectionHeader(context, 'About'),
+            const SizedBox(height: 12),
+            GlassCard(
+              padding: EdgeInsets.zero,
+              borderRadius: 20,
+              child: Column(
+                children: [
+                  _buildSettingTile(
+                    context,
+                    icon: Icons.info_outline_rounded,
+                    title: 'App Version',
+                    subtitle: '1.0.0 (Premium Build)',
+                  ),
+                  Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                  _buildSettingTile(
+                    context,
+                    icon: Icons.description_outlined,
+                    title: 'Terms of Service',
+                    trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                    onTap: () {},
+                  ),
+                  Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                  _buildSettingTile(
+                    context,
+                    icon: Icons.privacy_tip_outlined,
+                    title: 'Privacy Policy',
+                    trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                    onTap: () {},
+                  ),
+                ],
+              ),
+            ).animate().fadeIn(delay: 400.ms).slideX(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildGlassCard(BuildContext context, bool isDark, {required Widget child}) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.white.withValues(alpha: 0.7),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.white.withValues(alpha: 0.5),
-              width: 1.5,
-            ),
-          ),
-          child: child,
-        ),
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Text(
+      title,
+      style: TextStyle(
+        color: AppColors.primaryLight,
+        fontWeight: FontWeight.bold,
+        fontSize: 16,
+        letterSpacing: 0.5,
       ),
     );
   }
@@ -172,35 +134,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
     VoidCallback? onTap,
   }) {
     return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       leading: Container(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(8),
+          color: AppColors.primaryLight.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(
           icon,
-          color: Theme.of(context).primaryColor,
+          color: AppColors.primaryLight,
           size: 24,
         ),
       ),
       title: Text(
         title,
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
       ),
       subtitle: subtitle != null
           ? Text(
               subtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey,
-                  ),
+              style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7)),
             )
           : null,
       trailing: trailing,
       onTap: onTap,
     );
   }
-
 }
