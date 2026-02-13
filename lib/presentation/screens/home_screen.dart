@@ -9,6 +9,7 @@ import '../../core/services/view_mode_service.dart';
 import '../../data/daos/document_dao.dart';
 import '../../data/models/document_model.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/services/vehicle_service.dart';
 import '../widgets/dashboard_card.dart';
 import '../widgets/document_list_tile.dart';
 import '../widgets/document_card_view.dart';
@@ -19,6 +20,7 @@ import '../widgets/app_drawer.dart';
 import 'add_document_screen.dart';
 import 'pdf_viewer_screen.dart';
 import 'garage_screen.dart';
+import 'add_vehicle_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -249,14 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
             : const KeyedSubtree(key: const ValueKey('Garage'), child: GarageScreen()),
         ),
         
-        floatingActionButton: _currentIndex == 0 ? FloatingActionButton(
-          onPressed: () => _navigateToAddDocument(null),
-          backgroundColor: AppColors.primaryLight,
-          foregroundColor: Colors.white,
-          elevation: 10,
-          shape: const CircleBorder(),
-          child: const Icon(Icons.add_rounded, size: 32),
-        ).animate().scale(delay: 500.ms) : null,
+        floatingActionButton: _buildFloatingActionButton(),
         
         bottomNavigationBar: _buildGlassBottomNav(),
       ),
@@ -649,6 +644,40 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+  Widget? _buildFloatingActionButton() {
+    if (_currentIndex == 0) {
+      // Dashboard FAB
+      return FloatingActionButton(
+        onPressed: () => _navigateToAddDocument(null),
+        backgroundColor: AppColors.primaryLight,
+        foregroundColor: Colors.white,
+        elevation: 10,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add_rounded, size: 32),
+      ).animate(key: const ValueKey('fab_dashboard')).scale(duration: 300.ms, curve: Curves.easeOutBack);
+    } else if (_currentIndex == 1) {
+      // Garage FAB
+      return FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddEditVehicleScreen()),
+          ).then((value) {
+            if (value == true) {
+               Provider.of<VehicleService>(context, listen: false).loadVehicles();
+            }
+          });
+        },
+        backgroundColor: AppColors.primaryLight,
+        foregroundColor: Colors.white,
+        elevation: 10,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.two_wheeler_rounded, size: 28),
+      ).animate(key: const ValueKey('fab_garage')).scale(duration: 300.ms, curve: Curves.easeOutBack);
+    }
+    return null;
+  }
+
   Widget _buildShimmerView() {
     const bottomPadding = EdgeInsets.only(bottom: 100, left: 16, right: 16, top: 8);
     switch (_viewMode) {

@@ -23,9 +23,9 @@ class PDFViewerScreen extends StatefulWidget {
 }
 
 class _PDFViewerScreenState extends State<PDFViewerScreen> {
-  // Default to horizontal scrolling (page-by-page) as per original behavior
-  // Users can toggle to vertical for continuous scrolling
-  bool _isVertical = false;
+  // Default to vertical scrolling (continuous) as per user request
+  // Users can toggle to horizontal for page-by-page view
+  bool _isVertical = true;
 
   Future<void> _deleteDocument(BuildContext context) async {
     final confirm = await showDialog<bool>(
