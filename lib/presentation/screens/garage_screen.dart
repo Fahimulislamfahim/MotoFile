@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/services/vehicle_service.dart';
@@ -9,6 +10,7 @@ import 'add_vehicle_screen.dart';
 import 'service_history_screen.dart';
 import 'fuel_history_screen.dart';
 import 'reminders_screen.dart';
+import 'analytics_screen.dart';
 
 class GarageScreen extends StatefulWidget {
   const GarageScreen({super.key});
@@ -73,99 +75,154 @@ class _GarageScreenState extends State<GarageScreen> {
               ],
             ),
           );
-        }
+         }
 
-        final vehicle = service.vehicles.first; 
+        return Column(
+          children: [
+            Expanded(
+              child: PageView.builder(
+                controller: PageController(viewportFraction: 0.9),
+                itemCount: service.vehicles.length,
+                itemBuilder: (context, index) {
+                  final vehicle = service.vehicles[index];
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(8, 16, 8, 100), // Adjusted padding for PageView
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header Card
+                        _buildVehicleHeader(context, vehicle),
+                        
+                        // Extra spacing logic if needed, but the listview handles spacing. Keeping simpler.
+                        if (_isPremiumModel(vehicle))
+                           const SizedBox(height: 12),
+                        
+                        const SizedBox(height: 24),
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), // Bottom padding for nav/fab
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Card
-              // Header Card
-              _buildVehicleHeader(context, vehicle),
-              
-              // Extra spacing logic if needed, but the listview handles spacing. Keeping simpler.
-              if (_isPremiumModel(vehicle))
-                 const SizedBox(height: 12),
-              
-              const SizedBox(height: 24),
+                        // Identity Grid
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: const Text('Identity', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)).animate().fadeIn().moveX(),
+                        ),
+                        const SizedBox(height: 12),
+                        GridView.count(
+                          crossAxisCount: 2,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          childAspectRatio: 2.2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          children: [
+                            _buildInfoCard(context, 'License Plate', vehicle.licensePlate, Icons.pin_outlined),
+                            _buildInfoCard(context, 'Color', vehicle.color, Icons.palette_outlined),
+                            _buildInfoCard(context, 'VIN / Chassis', vehicle.vin, Icons.fingerprint),
+                            _buildInfoCard(context, 'Engine No.', vehicle.engineNumber, Icons.engineering_outlined),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
 
-              // Identity Grid
-              const Text('Identity', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)).animate().fadeIn().moveX(),
-              const SizedBox(height: 12),
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: 2.2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                children: [
-                  _buildInfoCard(context, 'License Plate', vehicle.licensePlate, Icons.pin_outlined),
-                  _buildInfoCard(context, 'Color', vehicle.color, Icons.palette_outlined),
-                  _buildInfoCard(context, 'VIN / Chassis', vehicle.vin, Icons.fingerprint),
-                  _buildInfoCard(context, 'Engine No.', vehicle.engineNumber, Icons.engineering_outlined),
-                ],
+                        // Specifications Section
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: const Text('Specifications', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)).animate().fadeIn(delay: 200.ms).moveX(),
+                        ),
+                        const SizedBox(height: 12),
+                         Padding(
+                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                           child: GlassCard(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            borderRadius: 20,
+                            child: Column(
+                              children: [
+                                _buildSpecRole(context, 'Tyre Pressure', vehicle.tyrePressure ?? 'N/A', Icons.air_rounded),
+                                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                                _buildSpecRole(context, 'Engine Oil', vehicle.oilType ?? 'N/A', Icons.opacity_rounded),
+                                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                                _buildSpecRole(context, 'Fuel Capacity', vehicle.fuelCapacity != null ? '${vehicle.fuelCapacity} L' : 'N/A', Icons.local_gas_station_rounded),
+                              ],
+                            ),
+                                                   ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
+                         ),
+
+                        if (vehicle.notes != null && vehicle.notes!.isNotEmpty) ...[
+                          const SizedBox(height: 24),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: const Text('Notes', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          ),
+                          const SizedBox(height: 12),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: GlassCard(
+                              borderRadius: 20,
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(16),
+                                child: Text(vehicle.notes!),
+                              ),
+                            ),
+                          ),
+                        ],
+                        
+                        const SizedBox(height: 32),
+                        
+                        // Actions
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: GlassCard(
+                            borderRadius: 24,
+                            padding: const EdgeInsets.all(8),
+                            child: Column(
+                              children: [
+                                _buildActionRow(context, 'Service History', Icons.history_rounded, () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => ServiceHistoryScreen(vehicle: vehicle)));
+                                }),
+                                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                                _buildActionRow(context, 'Fuel Tracker', Icons.local_gas_station_rounded, () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => FuelHistoryScreen(vehicle: vehicle)));
+                                }),
+                                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                                _buildActionRow(context, 'Maintenance Reminders', Icons.notifications_active_rounded, () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => RemindersScreen(vehicle: vehicle)));
+                                }),
+                                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                                _buildActionRow(context, 'Analytics & Charts', Icons.bar_chart_rounded, () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => AnalyticsScreen(vehicle: vehicle)));
+                                }),
+                              ],
+                            ),
+                          ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
-              const SizedBox(height: 24),
-
-              // Specs Section
-              const Text('Specifications', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)).animate().fadeIn(delay: 200.ms).moveX(),
-              const SizedBox(height: 12),
-               GlassCard(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                borderRadius: 20,
-                child: Column(
-                  children: [
-                    _buildSpecRole(context, 'Tyre Pressure', vehicle.tyrePressure ?? 'N/A', Icons.air_rounded),
-                    Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
-                    _buildSpecRole(context, 'Engine Oil', vehicle.oilType ?? 'N/A', Icons.opacity_rounded),
-                    Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
-                    _buildSpecRole(context, 'Fuel Capacity', vehicle.fuelCapacity != null ? '${vehicle.fuelCapacity} L' : 'N/A', Icons.local_gas_station_rounded),
-                  ],
+            ),
+            // Page Indicator (Simple Dots)
+            if (service.vehicles.length > 1)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 90.0), // Above bottom nav
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(service.vehicles.length, (index) {
+                     // We need state for current index to highlight properly.
+                     // For now, simple static dots to indicate swipeability.
+                     // Refinement: Add state tracking for dots.
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                    );
+                  }),
                 ),
-              ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
-
-              if (vehicle.notes != null && vehicle.notes!.isNotEmpty) ...[
-                const SizedBox(height: 24),
-                const Text('Notes', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                GlassCard(
-                  borderRadius: 20,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    child: Text(vehicle.notes!),
-                  ),
-                ),
-              ],
-              
-              const SizedBox(height: 32),
-              
-              // Actions
-              GlassCard(
-                borderRadius: 24,
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  children: [
-                    _buildActionRow(context, 'Service History', Icons.history_rounded, () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => ServiceHistoryScreen(vehicle: vehicle)));
-                    }),
-                    Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
-                    _buildActionRow(context, 'Fuel Tracker', Icons.local_gas_station_rounded, () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => FuelHistoryScreen(vehicle: vehicle)));
-                    }),
-                    Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
-                    _buildActionRow(context, 'Maintenance Reminders', Icons.notifications_active_rounded, () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => RemindersScreen(vehicle: vehicle)));
-                    }),
-                  ],
-                ),
-              ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
-            ],
-          ),
+              ),
+          ],
         );
       },
     );
@@ -244,8 +301,72 @@ class _GarageScreenState extends State<GarageScreen> {
     );
   }
 
+
   Widget _buildVehicleHeader(BuildContext context, Vehicle vehicle) {
-    // Premium Image Support for specific models
+    // Check for user-uploaded image first
+    if (vehicle.imagePath != null && vehicle.imagePath!.isNotEmpty) {
+      final file = File(vehicle.imagePath!);
+      if (file.existsSync()) {
+        return GlassCard(
+          borderRadius: 32,
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  // The Vehicle Image (Centered)
+                  Center(
+                    child: Container(
+                      height: 180,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4))
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.file(
+                          file,
+                          height: 180,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.broken_image, size: 80, color: Colors.grey);
+                          },
+                        ),
+                      ),
+                    ).animate().scale(duration: 800.ms, curve: Curves.easeOutBack).fadeIn(),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Vehicle Details
+                  Text(
+                    vehicle.name,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryLight,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                   _buildVehicleSubtitle(context, vehicle),
+                ],
+              ),
+              
+              // Edit Button (Top Right)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: _buildEditButton(context, vehicle),
+              ),
+            ],
+          ),
+        ).animate().slideY(begin: -0.2, end: 0, duration: 600.ms);
+      }
+    }
+
+    // Fallback to Premium Image Support for specific models or standard icon
     // Map format: "Make" : { "Model" : "FileName.png" }
     final Map<String, Map<String, String>> bikeAssets = {
       'Yamaha': {
@@ -294,23 +415,7 @@ class _GarageScreenState extends State<GarageScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
-                  ),
-                  child: Text(
-                    '${vehicle.make} ${vehicle.model} • ${vehicle.year}',
-                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14, 
-                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.8),
-                      fontWeight: FontWeight.w500
-                    ),
-                  ),
-                ),
+                _buildVehicleSubtitle(context, vehicle),
               ],
             ),
             
@@ -318,24 +423,7 @@ class _GarageScreenState extends State<GarageScreen> {
             Positioned(
               top: 0,
               right: 0,
-              child: IconButton(
-                onPressed: () {
-                   Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddEditVehicleScreen(vehicle: vehicle),
-                    ),
-                  );
-                },
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color:  Theme.of(context).cardColor.withOpacity(0.5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.edit_rounded, size: 20),
-                ),
-              ),
+              child: _buildEditButton(context, vehicle),
             ),
           ],
         ),
@@ -391,21 +479,53 @@ class _GarageScreenState extends State<GarageScreen> {
           Positioned(
             top: 0,
             right: 0,
-            child: IconButton(
-              icon: const Icon(Icons.edit_rounded),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddEditVehicleScreen(vehicle: vehicle),
-                  ),
-                );
-              },
-            ),
+            child: _buildEditButton(context, vehicle),
           ),
         ],
       ),
     ).animate().slideY(begin: -0.2, end: 0, duration: 500.ms);
+  }
+
+  Widget _buildVehicleSubtitle(BuildContext context, Vehicle vehicle) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface, 
+        // Note: Removed opacity for header text container for better contrast on images
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+      ),
+      child: Text(
+        '${vehicle.make} ${vehicle.model} • ${vehicle.year}',
+          textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 14, 
+          color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.8),
+          fontWeight: FontWeight.w500
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEditButton(BuildContext context, Vehicle vehicle) {
+    return IconButton(
+      onPressed: () {
+          Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AddEditVehicleScreen(vehicle: vehicle),
+          ),
+        );
+      },
+      icon: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color:  Theme.of(context).cardColor.withOpacity(0.5),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.edit_rounded, size: 20),
+      ),
+    );
   }
 
   bool _isPremiumModel(Vehicle vehicle) {

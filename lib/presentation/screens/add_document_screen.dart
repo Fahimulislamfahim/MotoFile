@@ -7,6 +7,7 @@ import 'package:path/path.dart' as path;
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../data/daos/document_dao.dart';
 import '../../data/database_helper.dart';
 import '../../data/models/document_model.dart';
 import '../../core/services/notification_service.dart';
@@ -185,7 +186,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
         status: status,
       );
 
-      final id = await DatabaseHelper.instance.create(document);
+      final id = await DocumentDao().create(document);
       await NotificationService().scheduleExpiryNotification(id: id, title: typeToSave, expiryDate: _expiryDate);
 
       if (mounted) Navigator.pop(context, true);

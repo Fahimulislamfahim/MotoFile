@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 
 import 'package:share_plus/share_plus.dart';
-import '../../data/database_helper.dart';
+import '../../data/daos/document_dao.dart';
 import '../../core/services/notification_service.dart';
 
 class PDFViewerScreen extends StatelessWidget {
@@ -37,7 +37,7 @@ class PDFViewerScreen extends StatelessWidget {
 
     if (confirm == true) {
       // 1. Delete from DB
-      await DatabaseHelper.instance.delete(documentId);
+      await DocumentDao().delete(documentId);
       
       // 2. Cancel notifications
       await NotificationService().cancelNotifications(documentId);

@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import '../../data/models/vehicle_model.dart';
 import '../../core/services/vehicle_service.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
 class AddEditVehicleScreen extends StatefulWidget {
   final Vehicle? vehicle;
@@ -32,6 +36,8 @@ class _AddEditVehicleScreenState extends State<AddEditVehicleScreen> {
   String _selectedType = 'Bike';
   final List<String> _vehicleTypes = ['Bike', 'Car', 'Scooter', 'Truck'];
   
+  String? _selectedImagePath;
+
   final Map<String, List<String>> _bikeMakes = {
     'Yamaha': ['FZ V2', 'FZ V3', 'Fazer V2', 'R15 V3', 'MT 15', 'R15 V4', 'FZX', 'Aerox 155', 'RayZR'],
     'Suzuki': ['Gixxer', 'Gixxer SF', 'Gixxer SF 250', 'Gixxer 250', 'Access 125', 'Burgman Street', 'Hayabusa'],
@@ -64,6 +70,7 @@ class _AddEditVehicleScreenState extends State<AddEditVehicleScreen> {
 
     if (widget.vehicle != null) {
       _selectedType = widget.vehicle!.type;
+      _selectedImagePath = widget.vehicle!.imagePath;
     }
   }
 
@@ -84,6 +91,22 @@ class _AddEditVehicleScreenState extends State<AddEditVehicleScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      // Save to local storage for persistence
+      final appDir = await getApplicationDocumentsDirectory();
+      final fileName = p.basename(pickedFile.path);
+      final savedImage = await File(pickedFile.path).copy('${appDir.path}/$fileName');
+
+      setState(() {
+        _selectedImagePath = savedImage.path;
+      });
+    }
+  }
+  
   Future<void> _saveVehicle() async {
     if (_formKey.currentState!.validate()) {
       final vehicle = Vehicle(
@@ -101,6 +124,7 @@ class _AddEditVehicleScreenState extends State<AddEditVehicleScreen> {
         oilType: _oilTypeController.text,
         fuelCapacity: _fuelCapacityController.text,
         notes: _notesController.text,
+        imagePath: _selectedImagePath,
       );
 
       final vehicleService = Provider.of<VehicleService>(context, listen: false);
@@ -130,6 +154,38 @@ class _AddEditVehicleScreenState extends State<AddEditVehicleScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+               Center(
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  child: Container(
+                    height: 150,
+                    width: 250,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                      image: _selectedImagePath != null
+                          ? DecorationImage(
+                              image: FileImage(File(_selectedImagePath!)),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: _selectedImagePath == null
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
+                              SizedBox(height: 8),
+                              Text('Tap to add photo', style: TextStyle(color: Colors.grey)),
+                            ],
+                          )
+                        : null,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
               _buildSectionTitle('Basic Info'),
               const SizedBox(height: 16),
               TextFormField(

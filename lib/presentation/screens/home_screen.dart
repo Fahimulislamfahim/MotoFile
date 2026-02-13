@@ -5,7 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme/theme_service.dart';
 import '../../core/services/card_order_service.dart';
 import '../../core/services/view_mode_service.dart';
-import '../../data/database_helper.dart';
+import '../../data/daos/document_dao.dart';
 import '../../data/models/document_model.dart';
 import '../../core/theme/app_colors.dart';
 import '../widgets/dashboard_card.dart';
@@ -26,9 +26,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _documentDao = DocumentDao();
   List<Document> _documents = [];
   bool _isLoading = true;
   final TextEditingController _searchController = TextEditingController();
+  
+  // ... rest of variables
+
   String _filter = 'All';
   final CardOrderService _cardOrderService = CardOrderService();
   final ViewModeService _viewModeService = ViewModeService();
@@ -60,6 +64,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  // ... _loadCardOrder, _loadViewMode, _saveCardOrder, _changeViewMode ...
+
   Future<void> _loadCardOrder() async {
     final order = await _cardOrderService.getCardOrder();
     setState(() {
@@ -90,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _refreshDocuments() async {
     setState(() => _isLoading = true);
-    final data = await DatabaseHelper.instance.readAllDocuments();
+    final data = await _documentDao.readAll();
     setState(() {
       _documents = data;
       _isLoading = false;

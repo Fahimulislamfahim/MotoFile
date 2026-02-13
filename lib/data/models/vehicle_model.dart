@@ -9,6 +9,7 @@ class Vehicle {
   final String vin; // Chassis Number
   final String engineNumber;
   final String color;
+  final String? imagePath; // Local path to user selected image
   
   // Specs
   final String? tyrePressure;
@@ -27,6 +28,7 @@ class Vehicle {
     required this.vin,
     required this.engineNumber,
     required this.color,
+    this.imagePath,
     this.tyrePressure,
     this.oilType,
     this.fuelCapacity,
@@ -45,6 +47,7 @@ class Vehicle {
       'vin': vin,
       'engine_number': engineNumber,
       'color': color,
+      'image_path': imagePath,
       'tyre_pressure': tyrePressure,
       'oil_type': oilType,
       'fuel_capacity': fuelCapacity,
@@ -64,6 +67,7 @@ class Vehicle {
       vin: map['vin'],
       engineNumber: map['engine_number'],
       color: map['color'],
+      imagePath: map['image_path'],
       tyrePressure: map['tyre_pressure'],
       oilType: map['oil_type'],
       fuelCapacity: map['fuel_capacity'],
@@ -82,6 +86,7 @@ class Vehicle {
     String? vin,
     String? engineNumber,
     String? color,
+    String? imagePath,
     String? tyrePressure,
     String? oilType,
     String? fuelCapacity,
@@ -98,6 +103,7 @@ class Vehicle {
       vin: vin ?? this.vin,
       engineNumber: engineNumber ?? this.engineNumber,
       color: color ?? this.color,
+      imagePath: imagePath ?? this.imagePath,
       tyrePressure: tyrePressure ?? this.tyrePressure,
       oilType: oilType ?? this.oilType,
       fuelCapacity: fuelCapacity ?? this.fuelCapacity,
