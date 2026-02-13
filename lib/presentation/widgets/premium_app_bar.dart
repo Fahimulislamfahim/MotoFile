@@ -25,7 +25,7 @@ class PremiumAppBar extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.all(8.0),
           child: GlassCard(
             padding: EdgeInsets.zero,
-            borderRadius: 12,
+            borderRadius: 24, // Circle/Roundish
             onTap: () => Navigator.pop(context),
             child: const Icon(Icons.arrow_back, size: 20),
           ),

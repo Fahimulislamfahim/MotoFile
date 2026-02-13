@@ -28,7 +28,7 @@ class DashboardCard extends StatelessWidget {
     return GlassCard(
       onTap: onTap,
       padding: const EdgeInsets.all(16),
-      borderRadius: 24,
+      borderRadius: 32, // More roundish
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

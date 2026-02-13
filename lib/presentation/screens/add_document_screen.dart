@@ -210,7 +210,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
               children: [
                 GlassCard(
                   padding: const EdgeInsets.all(16),
-                  borderRadius: 20,
+                  borderRadius: 32,
                   child: Column(
                     children: [
                        DropdownButtonFormField<String>(
@@ -267,7 +267,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
                     padding: const EdgeInsets.only(top: 16.0),
                     child: GlassCard(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      borderRadius: 16,
+                      borderRadius: 32,
                       child: Row(
                         children: [
                           Icon(Icons.check_circle, color: AppColors.success),
@@ -282,7 +282,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
                 
                 GlassCard(
                     padding: EdgeInsets.zero,
-                    borderRadius: 20,
+                    borderRadius: 32,
                     child: Column(
                       children: [
                         ListTile(
@@ -316,7 +316,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
                 foregroundColor: Colors.white,
                 elevation: 10,
                 shadowColor: AppColors.primaryLight.withOpacity(0.5),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: const StadiumBorder(),
               ),
               child: const Text('SAVE DOCUMENT', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1)),
             ),
@@ -333,7 +333,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: isPrimary ? AppColors.primaryLight : Theme.of(context).cardColor.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(32),
           border: Border.all(color: AppColors.primaryLight.withOpacity(0.3)),
           boxShadow: [
              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: Offset(0, 4))

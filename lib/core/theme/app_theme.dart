@@ -30,6 +30,47 @@ class AppTheme {
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
       },
     ),
+    // cardTheme: CardThemeData(
+    //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+    // ),
+    // dialogTheme: DialogThemeData(
+    //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+    // ),
+    bottomSheetTheme: const BottomSheetThemeData(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(32)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(32),
+        borderSide: const BorderSide(color: Colors.transparent),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(32),
+        borderSide: const BorderSide(color: AppColors.primaryLight),
+      ),
+      filled: true,
+      fillColor: AppColors.surfaceLight,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        shape: const StadiumBorder(), // Pill shape
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        shape: const StadiumBorder(),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        shape: const StadiumBorder(),
+      ),
+    ),
     useMaterial3: true,
   );
 
@@ -59,6 +100,47 @@ class AppTheme {
         TargetPlatform.android: ZoomPageTransitionsBuilder(),
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
       },
+    ),
+    // cardTheme: CardThemeData(
+    //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+    // ),
+    // dialogTheme: DialogThemeData(
+    //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+    // ),
+    bottomSheetTheme: const BottomSheetThemeData(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(32)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(32),
+        borderSide: const BorderSide(color: Colors.transparent),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(32),
+        borderSide: const BorderSide(color: AppColors.primaryDark),
+      ),
+      filled: true,
+      fillColor: AppColors.surfaceDark,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        shape: const StadiumBorder(),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        shape: const StadiumBorder(),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        shape: const StadiumBorder(),
+      ),
     ),
     useMaterial3: true,
   );

@@ -104,7 +104,7 @@ class _FuelHistoryScreenState extends State<FuelHistoryScreen> {
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: GlassCard(
-                        borderRadius: 24,
+                        borderRadius: 32, // Roundish
                         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -158,7 +158,7 @@ class _FuelHistoryScreenState extends State<FuelHistoryScreen> {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),
                               child: GlassCard(
-                                borderRadius: 16,
+                                borderRadius: 32, // Roundish
                                 padding: const EdgeInsets.all(16),
                                 child: Row(
                                   children: [
@@ -166,7 +166,7 @@ class _FuelHistoryScreenState extends State<FuelHistoryScreen> {
                                         padding: const EdgeInsets.all(10),
                                         decoration: BoxDecoration(
                                             color: AppColors.primaryLight.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(12)
+                                            borderRadius: BorderRadius.circular(20) // Rounder
                                         ),
                                         child: Icon(Icons.water_drop_rounded, color: AppColors.primaryLight)
                                     ),
@@ -200,7 +200,7 @@ class _FuelHistoryScreenState extends State<FuelHistoryScreen> {
                                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                                     decoration: BoxDecoration(
                                                         color: AppColors.success.withOpacity(0.1),
-                                                        borderRadius: BorderRadius.circular(8),
+                                                        borderRadius: BorderRadius.circular(16), // Rounder
                                                         border: Border.all(color: AppColors.success.withOpacity(0.2))
                                                     ),
                                                     child: Text('$efficiency km/L', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.success))
@@ -241,6 +241,7 @@ class _FuelHistoryScreenState extends State<FuelHistoryScreen> {
           backgroundColor: AppColors.accentLight,
           foregroundColor: Colors.white,
           elevation: 8,
+          shape: const CircleBorder(),
           child: const Icon(Icons.add_rounded, size: 32),
         ).animate().scale(delay: 500.ms),
       ),

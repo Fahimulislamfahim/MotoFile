@@ -42,7 +42,7 @@ class DocumentCardView extends StatelessWidget {
       child: GlassCard(
         onTap: onTap,
         padding: const EdgeInsets.all(24),
-        borderRadius: 28,
+        borderRadius: 32, // More roundish
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

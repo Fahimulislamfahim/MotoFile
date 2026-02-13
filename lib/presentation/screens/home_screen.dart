@@ -252,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: AppColors.primaryLight,
           foregroundColor: Colors.white,
           elevation: 10,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: const CircleBorder(),
           child: const Icon(Icons.add_rounded, size: 32),
         ).animate().scale(delay: 500.ms) : null,
         
@@ -283,8 +283,8 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             children: [
               GlassCard(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                borderRadius: 16,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2), // Reduced vertical padding slightly for better centering
+                borderRadius: 40,
                 child: TextField(
                   controller: _searchController,
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -292,6 +292,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     hintText: 'Search documents...',
                     prefixIcon: Icon(Icons.search_rounded),
                     border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    filled: false,
+                    fillColor: Colors.transparent,
                     contentPadding: EdgeInsets.symmetric(vertical: 14),
                   ),
                 ),

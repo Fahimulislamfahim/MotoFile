@@ -43,7 +43,7 @@ class DocumentListTile extends StatelessWidget {
       child: GlassCard(
         onTap: onTap,
         padding: const EdgeInsets.all(16),
-        borderRadius: 20,
+        borderRadius: 32, // Roundish
         child: Row(
           children: [
             // Status Icon with Glow
@@ -51,7 +51,7 @@ class DocumentListTile extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: _getStatusColor().withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(24), // Keep icon container slightly less round or match? Let's go 24.
                 border: Border.all(color: _getStatusColor().withOpacity(0.2)),
               ),
               child: Icon(
@@ -96,7 +96,7 @@ class DocumentListTile extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: _getStatusColor().withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(40), // Stadium
                 border: Border.all(
                   color: _getStatusColor().withOpacity(0.3),
                 ),

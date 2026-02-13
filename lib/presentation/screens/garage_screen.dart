@@ -132,7 +132,7 @@ class _GarageScreenState extends State<GarageScreen> {
                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
                            child: GlassCard(
                             padding: const EdgeInsets.symmetric(vertical: 8),
-                            borderRadius: 20,
+                            borderRadius: 32,
                             child: Column(
                               children: [
                                 _buildSpecRole(context, 'Tyre Pressure', vehicle.tyrePressure ?? 'N/A', Icons.air_rounded),
@@ -155,7 +155,7 @@ class _GarageScreenState extends State<GarageScreen> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8.0),
                             child: GlassCard(
-                              borderRadius: 20,
+                              borderRadius: 32,
                               child: Container(
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(16),
@@ -171,7 +171,7 @@ class _GarageScreenState extends State<GarageScreen> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: GlassCard(
-                            borderRadius: 24,
+                            borderRadius: 32,
                             padding: const EdgeInsets.all(8),
                             child: Column(
                               children: [
@@ -229,29 +229,121 @@ class _GarageScreenState extends State<GarageScreen> {
   }
 
   Widget _buildInfoCard(BuildContext context, String label, String value, IconData icon) {
-    return GlassCard(
-      padding: const EdgeInsets.all(12),
-      borderRadius: 16,
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: AppColors.primaryLight),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7))),
-                Text(
-                  value, 
-                  style: const TextStyle(fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis),
+    final tag = 'info_${label}_$value'; // Unique tag
+    
+    return Hero(
+      tag: tag,
+      child: Material(
+        color: Colors.transparent,
+        child: GlassCard(
+          onTap: () => _showCardPreview(context, label, value, icon, tag),
+          padding: const EdgeInsets.all(12),
+          borderRadius: 32,
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: AppColors.primaryLight),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7))),
+                    Text(
+                      value, 
+                      style: const TextStyle(fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  void _showCardPreview(BuildContext context, String label, String value, IconData icon, String tag) {
+    Navigator.of(context).push(PageRouteBuilder(
+      opaque: false,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.6), // Dim background
+      transitionDuration: const Duration(milliseconds: 400),
+      reverseTransitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return FadeTransition(
+          opacity: animation,
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: GestureDetector(
+              onTap: () => Navigator.of(context).pop(), // Tap outside to close
+              behavior: HitTestBehavior.opaque,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Hero(
+                    tag: tag,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: GestureDetector(
+                        onTap: () {}, // Tap inside does nothing (or could flip/interact)
+                        child: GlassCard(
+                          borderRadius: 40,
+                          padding: const EdgeInsets.all(32),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryLight.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(icon, size: 48, color: AppColors.primaryLight),
+                                ),
+                                const SizedBox(height: 24),
+                                Text(
+                                  label,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  value,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.2,
+                                  ),
+                                ),
+                                const SizedBox(height: 32),
+                                Text(
+                                  'Tap outside to close',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.withOpacity(0.5)
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    ));
   }
 
   Widget _buildSpecRole(BuildContext context, String label, String value, IconData icon) {

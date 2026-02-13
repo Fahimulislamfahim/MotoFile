@@ -95,7 +95,7 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: GlassCard(
-                          borderRadius: 20,
+                          borderRadius: 32, // Roundish
                           padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,7 +124,7 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
                                       color: AppColors.accentLight.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(20), // More roundish
                                       border: Border.all(color: AppColors.accentLight.withOpacity(0.2))
                                     ),
                                     child: Text(
@@ -176,6 +176,7 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
           onPressed: _addService,
           backgroundColor: AppColors.primaryLight,
           foregroundColor: Colors.white,
+          shape: const CircleBorder(),
           child: const Icon(Icons.add_rounded, size: 32),
         ).animate().scale(delay: 500.ms),
       ),

@@ -123,7 +123,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: GlassCard(
-                          borderRadius: 20,
+                          borderRadius: 32, // Roundish
                           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                           child: ListTile(
                             leading: Container(
@@ -166,6 +166,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
           onPressed: _addReminder,
           backgroundColor: AppColors.accentLight,
           foregroundColor: Colors.white,
+          shape: const CircleBorder(),
           child: const Icon(Icons.add_rounded, size: 32),
         ).animate().scale(delay: 500.ms),
       ),
