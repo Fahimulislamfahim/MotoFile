@@ -570,69 +570,53 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
-      margin: const EdgeInsets.fromLTRB(24, 0, 24, 34), // Lifted slightly
-      height: 84, // Taller for volume
+      margin: const EdgeInsets.fromLTRB(24, 0, 24, 34),
+      height: 84,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(44),
         boxShadow: [
-          // Ambient Glow/Shadow behind the glass
+          // Ambient Shadow
           BoxShadow(
-            color: isDark ? Colors.black.withOpacity(0.4) : Colors.black.withOpacity(0.15),
-            blurRadius: 40,
-            spreadRadius: -4,
-            offset: const Offset(0, 16),
+            color: Colors.black.withOpacity(isDark ? 0.4 : 0.2),
+            blurRadius: 30,
+            spreadRadius: -5,
+            offset: const Offset(0, 20),
           ),
         ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(44),
         child: BackdropFilter(
-          filter: UI.ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+          filter: UI.ImageFilter.blur(sigmaX: 50, sigmaY: 50), // Heavy blur for bending
           child: Container(
             decoration: BoxDecoration(
-              // The Glass Body
-              color: isDark ? Colors.black.withOpacity(0.3) : Colors.white.withOpacity(0.1),
               borderRadius: BorderRadius.circular(44),
               border: Border.all(
-                color: Colors.white.withOpacity(isDark ? 0.08 : 0.2), 
-                width: 1,
+                color: Colors.white.withOpacity(isDark ? 0.05 : 0.25),
+                width: 0.5,
               ),
+              // The "Clean Glass Lens" Gradient (Smooth)
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.0, 1.0], 
                 colors: [
-                  isDark ? Colors.white.withOpacity(0.15) : Colors.white.withOpacity(0.4),
-                  isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.1),
+                  isDark ? Colors.white.withOpacity(0.12) : Colors.white.withOpacity(0.3), // Top half reflection
+                  isDark ? Colors.white.withOpacity(0.0) : Colors.white.withOpacity(0.02), // Bottom clear
                 ],
               ),
             ),
             child: Stack(
               children: [
-                // 1. Top Rim Light (Sharp reflection on top edge)
+                // Top Reflection (Rim Light)
                 Positioned(
-                  top: 0, left: 20, right: 20, height: 1.5,
+                  top: 0, left: 30, right: 30, height: 1.5,
                   child: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
                           Colors.white.withOpacity(0.0),
-                          Colors.white.withOpacity(0.8),
-                          Colors.white.withOpacity(0.0),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                
-                // 2. Bottom Rim Light (Subtle reflection on bottom edge)
-                 Positioned(
-                  bottom: 0, left: 20, right: 20, height: 1,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.white.withOpacity(0.0),
-                          Colors.white.withOpacity(0.3),
+                          Colors.white.withOpacity(0.9), // Bright specularity
                           Colors.white.withOpacity(0.0),
                         ],
                       ),
@@ -640,34 +624,55 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                // 3. The Liquid Pill (Active State)
+                // Liquid Bubble/Droplet
                 LayoutBuilder(
                   builder: (context, constraints) {
                     return AnimatedAlign(
                       alignment: _currentIndex == 0 ? Alignment.centerLeft : Alignment.centerRight,
-                      duration: const Duration(milliseconds: 650),
-                      curve: Curves.easeOutCubic, // Real-world friction
+                      duration: const Duration(milliseconds: 700),
+                      curve: Curves.fastLinearToSlowEaseIn,
                       child: Container(
                         width: constraints.maxWidth / 2,
                         height: double.infinity,
                         padding: const EdgeInsets.all(5),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: AppColors.primaryLight.withOpacity(0.15),
+                            // Bubble Body
+                            color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(40),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.2), 
-                              width: 0.5
+                              color: Colors.white.withOpacity(0.15),
+                              width: 0.5,
                             ),
-                            // Inner volume gradient for the pill
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.white.withOpacity(0.2),
-                                Colors.white.withOpacity(0.05),
-                              ]
-                            )
+                            boxShadow: [
+                               // Inner Light Glint (Simulated volume)
+                               BoxShadow(
+                                 color: Colors.white.withOpacity(isDark ? 0.05 : 0.6),
+                                 blurRadius: 15,
+                                 spreadRadius: -2,
+                                 offset: const Offset(-2, -4) // Top left light source
+                               ),
+                               BoxShadow(
+                                 color: Colors.black.withOpacity(0.1),
+                                 blurRadius: 10,
+                                 spreadRadius: -2,
+                                 offset: const Offset(2, 4) // Bottom right shadow
+                               )
+                            ],
+                          ),
+                          // Inner Gradient for convexity
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(40),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Colors.white.withOpacity(isDark ? 0.1 : 0.4),
+                                  Colors.white.withOpacity(0.0),
+                                ]
+                              )
+                            ),
                           ),
                         ),
                       ),
@@ -675,7 +680,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
                 ),
 
-                // 4. Content (Icons)
+                 // Icons
                 Row(
                   children: [
                     Expanded(
