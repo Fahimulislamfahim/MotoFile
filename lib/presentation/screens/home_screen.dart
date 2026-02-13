@@ -1,4 +1,5 @@
 import 'dart:ui' as UI;
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -567,19 +568,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildGlassBottomNav() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 0, 20, 30),
-      height: 75,
+      height: 80,
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E2C).withOpacity(0.6) : Colors.white.withOpacity(0.7),
+        color: isDark ? const Color(0xFF1E1E2C).withOpacity(0.4) : Colors.white.withOpacity(0.4),
         borderRadius: BorderRadius.circular(40),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5),
+          color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.2),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 30,
             spreadRadius: 0,
             offset: const Offset(0, 10),
@@ -589,13 +591,50 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(40),
         child: BackdropFilter(
-          filter: UI.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildNavIcon(Icons.grid_view_rounded, 'Dashboard', 0),
-              _buildNavIcon(Icons.two_wheeler_rounded, 'Garage', 1),
-            ],
+          filter: UI.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                children: [
+                   // Liquid Sliding Pill
+                  AnimatedAlign(
+                    alignment: _currentIndex == 0 ? Alignment.centerLeft : Alignment.centerRight,
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeOutBack,
+                    child: Container(
+                      width: constraints.maxWidth / 2,
+                      height: double.infinity,
+                      padding: const EdgeInsets.all(8), // Padding creates the 'floating' look
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryLight.withOpacity(0.1),
+                              blurRadius: 20,
+                              spreadRadius: 0,
+                            )
+                          ],
+                          border: Border.all(
+                            color: AppColors.primaryLight.withOpacity(0.1),
+                            width: 1,
+                          )
+                        ),
+                      ),
+                    ),
+                  ),
+          
+                  // Icons Row
+                  Row(
+                    children: [
+                      Expanded(child: _buildNavIcon(Icons.grid_view_rounded, 'Dashboard', 0)),
+                      Expanded(child: _buildNavIcon(Icons.two_wheeler_rounded, 'Garage', 1)),
+                    ],
+                  ),
+                ],
+              );
+            }
           ),
         ),
       ),
@@ -605,41 +644,47 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildNavIcon(IconData icon, String label, int index) {
     final isSelected = _currentIndex == index;
     return GestureDetector(
-      onTap: () => setState(() => _currentIndex = index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeOutBack,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryLight.withOpacity(0.2) : Colors.transparent,
-          borderRadius: BorderRadius.circular(30),
-          border: isSelected ? Border.all(color: AppColors.primaryLight.withOpacity(0.3), width: 1) : Border.all(color: Colors.transparent),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedScale(
-              scale: isSelected ? 1.1 : 1.0,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOutBack,
-              child: Icon(
-                icon,
-                color: isSelected ? AppColors.primaryLight : const Color(0xFF8E8E93), // iOS grey
-                size: 26,
-              ),
-            ),
-            if (isSelected) ...[
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: AppColors.primaryLight,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
+      onTap: () {
+        if (_currentIndex != index) {
+          setState(() => _currentIndex = index);
+          HapticFeedback.lightImpact();
+        }
+      },
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        height: 80,
+        child: Center(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: FadeTransition(opacity: anim, child: child)),
+            child: isSelected 
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  key: ValueKey('selected_$index'),
+                  children: [
+                    Icon(icon, color: AppColors.primaryLight, size: 26),
+                    const SizedBox(width: 8),
+                    Flexible( // Use Flexible to prevent overflow if text is long
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.primaryLight,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : Icon(
+                  icon, 
+                  key: ValueKey('unselected_$index'),
+                  color: const Color(0xFF8E8E93), 
+                  size: 26
                 ),
-              ).animate().fadeIn(duration: 300.ms).slideX(begin: -0.2, end: 0),
-            ]
-          ],
+          ),
         ),
       ),
     );
