@@ -7,6 +7,7 @@ import 'package:path/path.dart' as path;
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:confetti/confetti.dart';
 import '../../data/daos/document_dao.dart';
 import '../../data/database_helper.dart';
 import '../../data/models/document_model.dart';
@@ -28,6 +29,7 @@ class AddDocumentScreen extends StatefulWidget {
 
 class _AddDocumentScreenState extends State<AddDocumentScreen> {
   final _formKey = GlobalKey<FormState>();
+  late ConfettiController _confettiController;
   String? _selectedType;
   DateTime? _issueDate;
   DateTime? _expiryDate;
@@ -45,6 +47,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
     if (widget.preselectedType != null && _docTypes.contains(widget.preselectedType)) {
       _selectedType = widget.preselectedType;
     } else {
@@ -54,6 +57,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
 
   @override
   void dispose() {
+    _confettiController.dispose();
     _customTypeController.dispose();
     super.dispose();
   }
@@ -189,6 +193,11 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
       final id = await DocumentDao().create(document);
       await NotificationService().scheduleExpiryNotification(id: id, title: typeToSave, expiryDate: _expiryDate);
 
+      _confettiController.play();
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Document Saved!'), backgroundColor: AppColors.success));
+      
+      await Future.delayed(const Duration(milliseconds: 1500));
+
       if (mounted) Navigator.pop(context, true);
     } else if (_pickedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a file or scan a document')));
@@ -201,9 +210,11 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: const PremiumAppBar(title: 'Add Document'),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
-          child: Form(
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
+              child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -303,6 +314,19 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
             ),
           ),
         ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              colors: const [Colors.green, Colors.blue, Colors.pink, Colors.orange, Colors.purple],
+              gravity: 0.1,
+              numberOfParticles: 30,
+            ),
+          ),
+        ],
+      ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),

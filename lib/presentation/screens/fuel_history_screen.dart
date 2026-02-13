@@ -155,81 +155,83 @@ class _FuelHistoryScreenState extends State<FuelHistoryScreen> {
                             final log = _logs[index];
                             final efficiency = _calculateEfficiency(index);
                             
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: GlassCard(
-                                borderRadius: 32, // Roundish
-                                padding: const EdgeInsets.all(16),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                            color: AppColors.primaryLight.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(20) // Rounder
-                                        ),
-                                        child: Icon(Icons.water_drop_rounded, color: AppColors.primaryLight)
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            log.date,
-                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            return RepaintBoundary(
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: GlassCard(
+                                  borderRadius: 32, // Roundish
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                              color: AppColors.primaryLight.withOpacity(0.1),
+                                              borderRadius: BorderRadius.circular(20) // Rounder
                                           ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            '${log.odometer} km • ${log.liters} L',
-                                            style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7), fontSize: 13),
+                                          child: Icon(Icons.water_drop_rounded, color: AppColors.primaryLight)
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              log.date,
+                                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              '${log.odometer} km • ${log.liters} L',
+                                              style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7), fontSize: 13),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                              Text(
+                                                  NumberFormat.currency(symbol: '\$').format(log.totalCost),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                              ),
+                                              if (efficiency != '-')
+                                                  Container(
+                                                      margin: const EdgeInsets.only(top: 4),
+                                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                                      decoration: BoxDecoration(
+                                                          color: AppColors.success.withOpacity(0.1),
+                                                          borderRadius: BorderRadius.circular(16), // Rounder
+                                                          border: Border.all(color: AppColors.success.withOpacity(0.2))
+                                                      ),
+                                                      child: Text('$efficiency km/L', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.success))
+                                                  )
+                                          ],
+                                      ),
+                                      const SizedBox(width: 8),
+                                      PopupMenuButton(
+                                        icon: Icon(Icons.more_vert_rounded, size: 20, color: Colors.grey.withOpacity(0.7)),
+                                        color: Theme.of(context).cardColor,
+                                        elevation: 4,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        itemBuilder: (context) => [
+                                          PopupMenuItem(
+                                            value: 'delete',
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.delete_rounded, color: AppColors.error, size: 20),
+                                                const SizedBox(width: 8),
+                                                Text('Delete', style: TextStyle(color: AppColors.error)),
+                                              ],
+                                            ),
+                                            onTap: () => _deleteLog(log.id!),
                                           ),
                                         ],
                                       ),
-                                    ),
-                                    Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
-                                        children: [
-                                            Text(
-                                                NumberFormat.currency(symbol: '\$').format(log.totalCost),
-                                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                            ),
-                                            if (efficiency != '-')
-                                                Container(
-                                                    margin: const EdgeInsets.only(top: 4),
-                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                                    decoration: BoxDecoration(
-                                                        color: AppColors.success.withOpacity(0.1),
-                                                        borderRadius: BorderRadius.circular(16), // Rounder
-                                                        border: Border.all(color: AppColors.success.withOpacity(0.2))
-                                                    ),
-                                                    child: Text('$efficiency km/L', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.success))
-                                                )
-                                        ],
-                                    ),
-                                    const SizedBox(width: 8),
-                                    PopupMenuButton(
-                                      icon: Icon(Icons.more_vert_rounded, size: 20, color: Colors.grey.withOpacity(0.7)),
-                                      color: Theme.of(context).cardColor,
-                                      elevation: 4,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                      itemBuilder: (context) => [
-                                        PopupMenuItem(
-                                          value: 'delete',
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.delete_rounded, color: AppColors.error, size: 20),
-                                              const SizedBox(width: 8),
-                                              Text('Delete', style: TextStyle(color: AppColors.error)),
-                                            ],
-                                          ),
-                                          onTap: () => _deleteLog(log.id!),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ).animate().fadeIn(delay: (index * 50).ms).slideX(),
+                                    ],
+                                  ),
+                                ).animate().fadeIn(delay: (index < 10 ? index * 50 : 500).ms).slideX(),
+                              ),
                             );
                           },
                         ),

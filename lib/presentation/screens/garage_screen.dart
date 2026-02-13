@@ -81,19 +81,22 @@ class _GarageScreenState extends State<GarageScreen> {
           children: [
             Expanded(
               child: PageView.builder(
-                controller: PageController(viewportFraction: 0.9),
+                controller: PageController(viewportFraction: 0.95), // Widened from 0.9
                 itemCount: service.vehicles.length,
                 itemBuilder: (context, index) {
                   final vehicle = service.vehicles[index];
                   return SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(8, 16, 8, 100), // Adjusted padding for PageView
+                    padding: const EdgeInsets.fromLTRB(4, 16, 4, 100), // Reduced horizontal padding
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch, // Ensure full width
                       children: [
                         // Header Card
-                        _buildVehicleHeader(context, vehicle),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: _buildVehicleHeader(context, vehicle),
+                        ),
                         
-                        // Extra spacing logic if needed, but the listview handles spacing. Keeping simpler.
+                        // Extra spacing logic if needed
                         if (_isPremiumModel(vehicle))
                            const SizedBox(height: 12),
                         
@@ -101,7 +104,7 @@ class _GarageScreenState extends State<GarageScreen> {
 
                         // Identity Grid
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0), // Aligned with card content
                           child: const Text('Identity', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)).animate().fadeIn().moveX(),
                         ),
                         const SizedBox(height: 12),
@@ -112,7 +115,7 @@ class _GarageScreenState extends State<GarageScreen> {
                           childAspectRatio: 2.2,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
-                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
                           children: [
                             _buildInfoCard(context, 'License Plate', vehicle.licensePlate, Icons.pin_outlined),
                             _buildInfoCard(context, 'Color', vehicle.color, Icons.palette_outlined),
@@ -124,12 +127,12 @@ class _GarageScreenState extends State<GarageScreen> {
 
                         // Specifications Section
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           child: const Text('Specifications', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)).animate().fadeIn(delay: 200.ms).moveX(),
                         ),
                         const SizedBox(height: 12),
                          Padding(
-                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
                            child: GlassCard(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             borderRadius: 32,
@@ -148,12 +151,12 @@ class _GarageScreenState extends State<GarageScreen> {
                         if (vehicle.notes != null && vehicle.notes!.isNotEmpty) ...[
                           const SizedBox(height: 24),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 12.0),
                             child: const Text('Notes', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                           ),
                           const SizedBox(height: 12),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
                             child: GlassCard(
                               borderRadius: 32,
                               child: Container(
@@ -169,7 +172,7 @@ class _GarageScreenState extends State<GarageScreen> {
                         
                         // Actions
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
                           child: GlassCard(
                             borderRadius: 32,
                             padding: const EdgeInsets.all(8),

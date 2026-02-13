@@ -1,7 +1,13 @@
+import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:confetti/confetti.dart';
+import 'package:google_fonts/google_fonts.dart'; // Assuming google_fonts is available based on implementation plan/common usage, if not I'll stick to standard theme. Pubspec showed google_fonts.
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/theme_service.dart';
+import '../widgets/glass_card.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -10,450 +16,433 @@ class AboutScreen extends StatefulWidget {
   State<AboutScreen> createState() => _AboutScreenState();
 }
 
-class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<Offset> _slideAnimation;
+class _AboutScreenState extends State<AboutScreen> {
+  late ConfettiController _confettiController;
+  int _versionTapCount = 0;
+  bool _isExpanded = false;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
-      ),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.0, 0.7, curve: Curves.elasticOut),
-      ),
-    );
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
-      ),
-    );
-
-    _animationController.forward();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _confettiController.dispose();
     super.dispose();
+  }
+
+  void _handleVersionTap() {
+    setState(() {
+      _versionTapCount++;
+    });
+    if (_versionTapCount == 7) {
+      _confettiController.play();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('🎉 You found the easter egg! You are awesome! 🎉'),
+          backgroundColor: AppColors.primaryLight,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        ),
+      );
+      _versionTapCount = 0;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final themeService = Provider.of<ThemeService>(context);
-    final isDark = themeService.isDarkMode;
+    final isDark = Provider.of<ThemeService>(context).isDarkMode;
+    final primaryColor = AppColors.primaryLight;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: isDark
-                ? [
-                    const Color(0xFF121212),
-                    const Color(0xFF1A1A1A),
-                    const Color(0xFF121212),
-                  ]
-                : [
-                    Colors.grey[50]!,
-                    Colors.white,
-                    Colors.grey[100]!,
-                  ],
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.black26 : Colors.white24,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           ),
+          onPressed: () => Navigator.pop(context),
         ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                // Animated Developer Image
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: ScaleTransition(
-                    scale: _scaleAnimation,
-                    child: _buildDeveloperImage(context, isDark),
-                  ),
+      ),
+      body: Stack(
+        children: [
+          // 1. Premium Animated Background
+          const _AnimatedBackground(),
+
+          // 2. Content
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    
+                    // Profile Image with Breathing Glow
+                    _buildProfileSection(context, isDark),
+                    
+                    const SizedBox(height: 40),
+
+                    // Developer Card (Expandable)
+                    _buildDeveloperCard(context, isDark),
+
+                    const SizedBox(height: 24),
+
+                    // Tech Stack
+                    _buildTechStack(context, isDark),
+
+                    const SizedBox(height: 40),
+
+                    // App Info & Easter Egg
+                    GestureDetector(
+                      onTap: _handleVersionTap,
+                      child: Column(
+                        children: [
+                          Text(
+                            'MotoFile',
+                            style: GoogleFonts.outfit(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                              color: isDark ? Colors.white : const Color(0xFF2D3436),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Version 1.0.0 (Build 1)',
+                            style: TextStyle(
+                              color: isDark ? Colors.white54 : Colors.black45,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '© 2026 Crafted with ❤️',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? Colors.white38 : Colors.black38,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ).animate().fadeIn(delay: 800.ms),
+
+                    const SizedBox(height: 40),
+                  ],
                 ),
-                const SizedBox(height: 40),
-                // Developer Info Card
-                SlideTransition(
-                  position: _slideAnimation,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: _buildDeveloperCard(context, isDark),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // App Info Card
-                SlideTransition(
-                  position: _slideAnimation,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: _buildAppInfoCard(context, isDark),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                // Copyright
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: _buildCopyright(context, isDark),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+
+          // 3. Confetti Overlay
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirection: pi / 2,
+              maxBlastForce: 5,
+              minBlastForce: 2,
+              emissionFrequency: 0.05,
+              numberOfParticles: 50,
+              gravity: 0.1,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildDeveloperImage(BuildContext context, bool isDark) {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).primaryColor.withOpacity(0.5),
-            blurRadius: 50,
-            spreadRadius: 5,
-          ),
-          BoxShadow(
-            color: Theme.of(context).primaryColor.withOpacity(0.3),
-            blurRadius: 100,
-            spreadRadius: 15,
-          ),
-        ],
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).primaryColor,
-              Theme.of(context).primaryColor.withOpacity(0.7),
-              Theme.of(context).primaryColor,
-            ],
-            stops: const [0.0, 0.5, 1.0],
-          ),
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(5),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isDark ? const Color(0xFF121212) : Colors.white,
-          ),
-          child: ClipOval(
-            child: Image.asset(
-              'assets/images/developer.jpg',
-              width: 180,
-              height: 180,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: 180,
-                  height: 180,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
+  Widget _buildProfileSection(BuildContext context, bool isDark) {
+    return Column(
+      children: [
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            // Glow layer
+            Container(
+              width: 160,
+              height: 160,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primaryLight.withOpacity(0.4),
+              ),
+            ).animate(onPlay: (c) => c.repeat(reverse: true))
+             .blur(begin: const Offset(20, 20), end: const Offset(40, 40), duration: 2.seconds)
+             .scale(begin: const Offset(1, 1), end: const Offset(1.2, 1.2), duration: 2.seconds),
+
+            // Image container
+            Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withOpacity(0.2), width: 4),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/images/developer.jpg',
+                  fit: BoxFit.cover,
+                  errorBuilder: (ctx, _, __) => Container(
                     color: isDark ? const Color(0xFF1E1E1E) : Colors.grey[200],
+                    child: Icon(Icons.person_rounded, size: 60, color: AppColors.primaryLight),
                   ),
-                  child: Icon(
-                    Icons.person,
-                    size: 90,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                );
-              },
+                ),
+              ),
             ),
+          ],
+        ).animate().scale(duration: 800.ms, curve: Curves.easeOutBack),
+        
+        const SizedBox(height: 24),
+        
+        Text(
+          'Fahimul Islam Fahim',
+          style: GoogleFonts.outfit(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : const Color(0xFF2D3436),
           ),
-        ),
-      ),
+        ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.3, end: 0),
+        
+        Text(
+          'Flutter Developer & UI Designer',
+          style: GoogleFonts.outfit(
+            fontSize: 16,
+            color: AppColors.primaryLight,
+            fontWeight: FontWeight.w500,
+          ),
+        ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.3, end: 0),
+      ],
     );
   }
 
   Widget _buildDeveloperCard(BuildContext context, bool isDark) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          padding: const EdgeInsets.all(36),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isDark
-                  ? [
-                      Colors.white.withOpacity(0.1),
-                      Colors.white.withOpacity(0.05),
-                    ]
-                  : [
-                      Colors.white.withOpacity(0.95),
-                      Colors.white.withOpacity(0.7),
-                    ],
-            ),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withOpacity(0.2)
-                  : Colors.white.withOpacity(0.8),
-              width: 2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? Colors.black.withOpacity(0.4)
-                    : Colors.black.withOpacity(0.08),
-                blurRadius: 40,
-                offset: const Offset(0, 20),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor.withOpacity(0.3),
-                      Theme.of(context).primaryColor.withOpacity(0.1),
-                    ],
+    return GlassCard(
+      borderRadius: 32,
+      padding: EdgeInsets.zero,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight.withOpacity(0.1),
+                    shape: BoxShape.circle,
                   ),
+                  child: Icon(Icons.code_rounded, color: AppColors.primaryLight),
                 ),
-                child: Icon(
-                  Icons.code,
-                  size: 48,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'DEVELOPED BY',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
-                      letterSpacing: 3,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
-                  colors: [
-                    Theme.of(context).primaryColor,
-                    Theme.of(context).primaryColor.withOpacity(0.8),
-                  ],
-                ).createShader(bounds),
-                child: Text(
-                  'Fahimul Islam Fahim',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 0.5,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'About the Developer',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.white60 : Colors.black45,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
                       ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor.withOpacity(0.3),
-                      Theme.of(context).primaryColor.withOpacity(0.2),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Crafting Digital Experiences',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(
-                    color: Theme.of(context).primaryColor.withOpacity(0.4),
-                    width: 1.5,
+                ),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _isExpanded = !_isExpanded;
+                    });
+                  },
+                  icon: Icon(
+                    _isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                    color: isDark ? Colors.white70 : Colors.black54,
                   ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.flutter_dash,
-                      color: Theme.of(context).primaryColor,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Flutter Developer',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAppInfoCard(BuildContext context, bool isDark) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-        child: Container(
-          padding: const EdgeInsets.all(28),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            color: isDark
-                ? Colors.white.withOpacity(0.06)
-                : Colors.white.withOpacity(0.8),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withOpacity(0.12)
-                  : Colors.white.withOpacity(0.6),
-              width: 1.5,
+              ],
             ),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? Colors.black.withOpacity(0.3)
-                    : Colors.black.withOpacity(0.05),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Row(
+            
+            // Expandable Content
+            AnimatedCrossFade(
+              firstChild: const SizedBox.shrink(),
+              secondChild: Column(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Theme.of(context).primaryColor.withOpacity(0.3),
-                          Theme.of(context).primaryColor.withOpacity(0.1),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.description_rounded,
-                      color: Theme.of(context).primaryColor,
-                      size: 28,
+                  const SizedBox(height: 24),
+                  Divider(color: isDark ? Colors.white12 : Colors.black12),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Passionate about building beautiful, functional, and performant mobile applications. MotoFile is a testament to the power of Flutter and clean design.",
+                    style: TextStyle(
+                      height: 1.5,
+                      color: isDark ? Colors.white70 : Colors.black87,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'MotoFile',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 22,
-                              ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Your Digital Document Manager',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey[600],
-                              ),
-                        ),
-                      ],
-                    ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildSocialButton(context, Icons.code, 'GitHub'),
+                      _buildSocialButton(context, Icons.link, 'LinkedIn'),
+                      _buildSocialButton(context, Icons.language, 'Web'),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              _buildInfoRow(context, 'Version', '1.0.1', Icons.info_outline),
-              const SizedBox(height: 16),
-              _buildInfoRow(context, 'Build', '1', Icons.build_circle_outlined),
-              const SizedBox(height: 16),
-              _buildInfoRow(context, 'Platform', 'Flutter', Icons.phone_android_outlined),
-            ],
-          ),
+              crossFadeState: _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 400),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(BuildContext context, String label, String value, IconData icon) {
-    return Row(
+  Widget _buildSocialButton(BuildContext context, IconData icon, String label) {
+    final isDark = Provider.of<ThemeService>(context).isDarkMode;
+    return Column(
       children: [
-        Icon(
-          icon,
-          color: Theme.of(context).primaryColor.withOpacity(0.7),
-          size: 20,
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.white10 : Colors.grey[100],
+            shape: BoxShape.circle,
+            border: Border.all(color: isDark ? Colors.white24 : Colors.grey[300]!),
+          ),
+          child: Icon(icon, size: 20, color: isDark ? Colors.white : Colors.black87),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(height: 8),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey,
-              ),
-        ),
-        const Spacer(),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: TextStyle(
+            fontSize: 12,
+            color: isDark ? Colors.white60 : Colors.black54,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildCopyright(BuildContext context, bool isDark) {
+  Widget _buildTechStack(BuildContext context, bool isDark) {
+    final techs = ['Flutter', 'Dart', 'Provider', 'SQLite', 'Google Fonts', 'Animate'];
+    
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 12),
-        Text(
-          '© 2026 MotoFile',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey,
-                fontWeight: FontWeight.w500,
-              ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text(
+            'POWERED BY',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
+              color: isDark ? Colors.white54 : Colors.black45,
+            ),
+          ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          'All rights reserved',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: techs.map((tech) => _buildTechChip(context, tech)).toList(),
+        ),
+      ],
+    ).animate().fadeIn(delay: 600.ms);
+  }
+
+  Widget _buildTechChip(BuildContext context, String label) {
+    final isDark = Provider.of<ThemeService>(context).isDarkMode;
+    return GlassCard(
+      borderRadius: 20,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: isDark ? Colors.white.withOpacity(0.9) : AppColors.primaryLight,
+        ),
+      ),
+    );
+  }
+}
+
+class _AnimatedBackground extends StatelessWidget {
+  const _AnimatedBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Provider.of<ThemeService>(context).isDarkMode;
+    // Premium Mesh Gradient effect using heavy blurs and moving blobs
+    return Stack(
+      children: [
+        Container(color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8F9FA)),
+        
+        // Blobs
+        Positioned(
+          top: -100,
+          right: -100,
+          child: Container(
+            width: 300,
+            height: 300,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.primaryLight.withOpacity(0.3),
+            ),
+          ).animate(onPlay: (c) => c.repeat(reverse: true))
+           .moveX(begin: 0, end: 50, duration: 4.seconds)
+           .scale(begin: const Offset(1,1), end: const Offset(1.2,1.2), duration: 5.seconds),
+        ),
+        
+        Positioned(
+          bottom: 100,
+          left: -50,
+          child: Container(
+            width: 250,
+            height: 250,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.accentLight.withOpacity(0.3),
+            ),
+          ).animate(onPlay: (c) => c.repeat(reverse: true))
+           .moveY(begin: 0, end: 50, duration: 6.seconds)
+           .scale(begin: const Offset(1,1), end: const Offset(1.3,1.3), duration: 7.seconds),
+        ),
+
+        // Blur Overlay
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
+          child: Container(color: Colors.transparent),
         ),
       ],
     );

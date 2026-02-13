@@ -9,6 +9,7 @@ class DocumentListTile extends StatelessWidget {
   final DateTime? expiryDate;
   final String status;
   final VoidCallback onTap;
+  final Duration animationDelay;
 
   const DocumentListTile({
     super.key,
@@ -16,6 +17,7 @@ class DocumentListTile extends StatelessWidget {
     required this.expiryDate,
     required this.status,
     required this.onTap,
+    this.animationDelay = Duration.zero,
   });
 
   Color _getStatusColor() {
@@ -112,7 +114,8 @@ class DocumentListTile extends StatelessWidget {
             ),
           ],
         ),
-      ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.1, end: 0),
+
+      ).animate(delay: animationDelay).fadeIn(duration: 300.ms).slideX(begin: 0.1, end: 0),
     );
   }
 }

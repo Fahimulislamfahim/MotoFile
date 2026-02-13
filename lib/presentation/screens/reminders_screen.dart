@@ -120,45 +120,47 @@ class _RemindersScreenState extends State<RemindersScreen> {
                       final statusColor = _getStatusColor(reminder);
                       final statusText = _getStatusText(reminder);
                       
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: GlassCard(
-                          borderRadius: 32, // Roundish
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                          child: ListTile(
-                            leading: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.1),
-                                shape: BoxShape.circle,
+                      return RepaintBoundary(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: GlassCard(
+                            padding: const EdgeInsets.all(16),
+                            child: ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              leading: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12)
+                                ),
+                                child: Icon(Icons.notifications_active_rounded, color: statusColor)
                               ),
-                              child: Icon(Icons.notifications_active_rounded, color: statusColor),
+                              title: Text(
+                                reminder.title,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 4),
+                                  Text(statusText, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold)),
+                                  if (reminder.isRecurring)
+                                    Row(
+                                      children: [
+                                        Icon(Icons.repeat_rounded, size: 12, color: Colors.grey.withOpacity(0.7)),
+                                        const SizedBox(width: 4),
+                                        Text('Repeating', style: TextStyle(fontSize: 12, color: Colors.grey.withOpacity(0.7))),
+                                      ],
+                                    )
+                                ],
+                              ),
+                              trailing: IconButton(
+                                icon: Icon(Icons.check_circle_outline_rounded, color: Colors.grey.withOpacity(0.5)),
+                                onPressed: () => _deleteReminder(reminder.id!),
+                              ),
                             ),
-                            title: Text(
-                              reminder.title, 
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 4),
-                                Text(statusText, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold)),
-                                if (reminder.isRecurring)
-                                  Row(
-                                    children: [
-                                      Icon(Icons.repeat_rounded, size: 12, color: Colors.grey.withOpacity(0.7)),
-                                      const SizedBox(width: 4),
-                                      Text('Repeating', style: TextStyle(fontSize: 12, color: Colors.grey.withOpacity(0.7))),
-                                    ],
-                                  )
-                              ],
-                            ),
-                            trailing: IconButton(
-                              icon: Icon(Icons.check_circle_outline_rounded, color: Colors.grey.withOpacity(0.5)),
-                              onPressed: () => _deleteReminder(reminder.id!),
-                            ),
-                          ),
-                        ).animate().fadeIn(delay: (index * 50).ms).slideX(),
+                          ).animate().fadeIn(delay: (index < 10 ? index * 50 : 500).ms).slideX(),
+                        ),
                       );
                     },
                   ),

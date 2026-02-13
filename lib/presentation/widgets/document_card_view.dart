@@ -9,6 +9,7 @@ class DocumentCardView extends StatelessWidget {
   final DateTime? expiryDate;
   final String status;
   final VoidCallback onTap;
+  final Duration animationDelay;
 
   const DocumentCardView({
     super.key,
@@ -16,6 +17,7 @@ class DocumentCardView extends StatelessWidget {
     required this.expiryDate,
     required this.status,
     required this.onTap,
+    this.animationDelay = Duration.zero,
   });
 
   Color _getStatusColor() {
@@ -169,7 +171,8 @@ class DocumentCardView extends StatelessWidget {
             ),
           ],
         ),
-      ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
+
+      ).animate(delay: animationDelay).fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
     );
   }
 }

@@ -60,6 +60,14 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
     _loadLogs();
   }
 
+  IconData _getServiceIcon(String type) {
+    if (type.toLowerCase().contains('oil')) return Icons.oil_barrel_rounded;
+    if (type.toLowerCase().contains('tire')) return Icons.tire_repair_rounded;
+    if (type.toLowerCase().contains('brake')) return Icons.car_crash_rounded;
+    if (type.toLowerCase().contains('battery')) return Icons.battery_charging_full_rounded;
+    return Icons.build_circle_rounded;
+  }
+
   @override
   Widget build(BuildContext context) {
     return PremiumBackground(
@@ -92,83 +100,68 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
                     itemCount: _logs.length,
                     itemBuilder: (context, index) {
                       final log = _logs[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: GlassCard(
-                          borderRadius: 32, // Roundish
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    log.serviceType,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      return RepaintBoundary(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: GlassCard(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryLight.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12)
                                   ),
-                                  Text(
-                                    log.date,
-                                    style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7), fontSize: 14),
+                                  child: Icon(_getServiceIcon(log.serviceType), color: AppColors.primaryLight)
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        log.serviceType,
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${log.date} • ${log.odometer} km',
+                                        style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7), fontSize: 13),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Icon(Icons.speed_rounded, size: 16, color: AppColors.primaryLight),
-                                  const SizedBox(width: 4),
-                                  Text('${log.odometer} km'),
-                                  const Spacer(),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.accentLight.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(20), // More roundish
-                                      border: Border.all(color: AppColors.accentLight.withOpacity(0.2))
-                                    ),
-                                    child: Text(
-                                      '${NumberFormat.currency(symbol: '\$').format(log.cost)}',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.accentLight,
-                                          fontSize: 16),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (log.notes != null && log.notes!.isNotEmpty) ...[
-                                Divider(height: 24, color: Theme.of(context).dividerColor.withOpacity(0.1)),
-                                Text(
-                                  log.notes!,
-                                  style: TextStyle(fontStyle: FontStyle.italic, color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.8)),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                     Text(
+                                       NumberFormat.currency(symbol: '\$').format(log.cost),
+                                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                     ),
+                                     IconButton(
+                                        icon: Icon(Icons.delete_outline_rounded, size: 20, color: AppColors.error.withOpacity(0.7)),
+                                        onPressed: () {
+                                           showDialog(
+                                             context: context,
+                                             builder: (ctx) => AlertDialog(
+                                                 backgroundColor: Theme.of(context).cardColor,
+                                                 title: const Text('Delete Log?'),
+                                                 content: const Text('This cannot be undone.'),
+                                                 actions: [
+                                                   TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+                                                   TextButton(onPressed: () { Navigator.pop(ctx); _deleteLog(log.id!); }, child: const Text('Delete', style: TextStyle(color: Colors.red))),
+                                                 ]
+                                             )
+                                           );
+                                        },
+                                     )
+                                  ],
                                 ),
                               ],
-                               Row(
-                                 mainAxisAlignment: MainAxisAlignment.end,
-                                 children: [
-                                   IconButton(
-                                      icon: Icon(Icons.delete_outline_rounded, size: 20, color: AppColors.error.withOpacity(0.7)),
-                                      onPressed: () {
-                                         showDialog(
-                                           context: context,
-                                           builder: (ctx) => AlertDialog(
-                                               backgroundColor: Theme.of(context).cardColor,
-                                               title: const Text('Delete Log?'),
-                                               content: const Text('This cannot be undone.'),
-                                               actions: [
-                                                 TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-                                                 TextButton(onPressed: () { Navigator.pop(ctx); _deleteLog(log.id!); }, child: const Text('Delete', style: TextStyle(color: Colors.red))),
-                                               ]
-                                           )
-                                         );
-                                      },
-                                   )
-                                 ],
-                               )
-                            ],
-                          ),
-                        ).animate().fadeIn(delay: (index * 50).ms).slideX(),
+                            ),
+                          ).animate().fadeIn(delay: (index < 10 ? index * 50 : 500).ms).slideX(),
+                        ),
                       );
                     },
                   ),

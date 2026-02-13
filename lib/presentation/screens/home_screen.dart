@@ -2,6 +2,7 @@ import 'dart:ui' as UI;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:animations/animations.dart';
 import '../../core/theme/theme_service.dart';
 import '../../core/services/card_order_service.dart';
 import '../../core/services/view_mode_service.dart';
@@ -13,6 +14,7 @@ import '../widgets/document_list_tile.dart';
 import '../widgets/document_card_view.dart';
 import '../widgets/premium_background.dart';
 import '../widgets/glass_card.dart';
+import '../widgets/shimmer_placeholder.dart';
 import '../widgets/app_drawer.dart';
 import 'add_document_screen.dart';
 import 'pdf_viewer_screen.dart';
@@ -353,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // Content Area
         Expanded(
           child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? _buildShimmerView()
               : _displayTypes.isEmpty
                   ? Center(child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -399,34 +401,65 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (context, index) {
              final title = _displayTypes[index];
              final doc = _getDocumentForType(title);
-             return LongPressDraggable<int>(
-              data: index,
-              feedback: Material(
-                color: Colors.transparent,
-                child: Transform.scale(
-                  scale: 1.05,
-                  child: SizedBox(
-                    width: (MediaQuery.of(context).size.width - 48) / 2,
-                    child: DashboardCard(
+             
+             return OpenContainer(
+               transitionType: ContainerTransitionType.fadeThrough,
+               closedElevation: 0,
+               openElevation: 0,
+               closedColor: Colors.transparent,
+               openColor: Theme.of(context).scaffoldBackgroundColor,
+               middleColor: Colors.transparent,
+               tappable: false,
+               transitionDuration: const Duration(milliseconds: 500),
+               onClosed: (value) {
+                 if (value == true) _refreshDocuments();
+               },
+               openBuilder: (context, action) {
+                 if (doc.status == 'Missing') {
+                   return AddDocumentScreen(preselectedType: title);
+                 } else {
+                   return PDFViewerScreen(
+                      filePath: doc.filePath,
                       title: title,
-                      expiryDate: doc.expiryDate,
-                      status: doc.status,
-                      onTap: () {},
+                      documentId: doc.id!,
+                   );
+                 }
+               },
+               closedBuilder: (context, action) {
+                 return LongPressDraggable<int>(
+                  data: index,
+                  feedback: Material(
+                    color: Colors.transparent,
+                    child: Transform.scale(
+                      scale: 1.05,
+                      child: SizedBox(
+                        width: (MediaQuery.of(context).size.width - 48) / 2,
+                        child: DashboardCard(
+                          title: title,
+                          expiryDate: doc.expiryDate,
+                          status: doc.status,
+                          onTap: () {},
+                          animationDelay: (index < 10 ? index * 50 : 500).ms,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              childWhenDragging: Opacity(opacity: 0.3, child: DashboardCard(title: title, expiryDate: doc.expiryDate, status: doc.status, onTap: () {})),
-              child: DragTarget<int>(
-                onAcceptWithDetails: (details) => _onReorder(details.data, index),
-                builder: (context, cand, rej) => DashboardCard(
-                  key: ValueKey(title),
-                  title: title,
-                  expiryDate: doc.expiryDate,
-                  status: doc.status,
-                  onTap: () => _navigateToDocument(title),
-                ),
-              ),
+                  childWhenDragging: Opacity(opacity: 0.3, child: DashboardCard(title: title, expiryDate: doc.expiryDate, status: doc.status, onTap: () {})),
+                  child: RepaintBoundary(
+                    child: DragTarget<int>(
+                      onAcceptWithDetails: (details) => _onReorder(details.data, index),
+                      builder: (context, cand, rej) => DashboardCard(
+                        key: ValueKey(title),
+                        title: title,
+                        expiryDate: doc.expiryDate,
+                        status: doc.status,
+                        onTap: action,
+                        animationDelay: (index < 10 ? index * 50 : 500).ms,
+                      ),
+                    ),
+                  ),
+                 );
+               },
              );
           },
         );
@@ -440,12 +473,45 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (context, index) {
             final title = _displayTypes[index];
             final doc = _getDocumentForType(title);
-            return DocumentListTile(
+            
+            return RepaintBoundary(
               key: ValueKey(title),
-              title: title,
-              expiryDate: _parseDate(doc.expiryDate),
-              status: doc.status,
-              onTap: () => _navigateToDocument(title),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12), // Moved padding here to wrap OpenContainer
+                child: OpenContainer(
+                   transitionType: ContainerTransitionType.fadeThrough,
+                   closedElevation: 0,
+                   openElevation: 0,
+                   closedColor: Colors.transparent,
+                   openColor: Theme.of(context).scaffoldBackgroundColor,
+                   middleColor: Colors.transparent,
+                   tappable: false, // We control tap
+                   transitionDuration: const Duration(milliseconds: 500),
+                   onClosed: (value) {
+                     if (value == true) _refreshDocuments();
+                   },
+                   openBuilder: (context, action) {
+                     if (doc.status == 'Missing') {
+                       return AddDocumentScreen(preselectedType: title);
+                     } else {
+                       return PDFViewerScreen(
+                          filePath: doc.filePath,
+                          title: title,
+                          documentId: doc.id!,
+                       );
+                     }
+                   },
+                   closedBuilder: (context, action) {
+                      return DocumentListTile(
+                        title: title,
+                        expiryDate: _parseDate(doc.expiryDate),
+                        status: doc.status,
+                        onTap: action,
+                        animationDelay: (index < 10 ? index * 50 : 500).ms,
+                      );
+                   }
+                ),
+              ),
             );
           },
         );
@@ -459,12 +525,45 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (context, index) {
             final title = _displayTypes[index];
             final doc = _getDocumentForType(title);
-            return DocumentCardView(
+            
+            return RepaintBoundary(
               key: ValueKey(title),
-              title: title,
-              expiryDate: _parseDate(doc.expiryDate),
-              status: doc.status,
-              onTap: () => _navigateToDocument(title),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: OpenContainer(
+                   transitionType: ContainerTransitionType.fadeThrough,
+                   closedElevation: 0,
+                   openElevation: 0,
+                   closedColor: Colors.transparent,
+                   openColor: Theme.of(context).scaffoldBackgroundColor,
+                   middleColor: Colors.transparent,
+                   tappable: false,
+                   transitionDuration: const Duration(milliseconds: 500),
+                   onClosed: (value) {
+                     if (value == true) _refreshDocuments();
+                   },
+                   openBuilder: (context, action) {
+                     if (doc.status == 'Missing') {
+                       return AddDocumentScreen(preselectedType: title);
+                     } else {
+                       return PDFViewerScreen(
+                          filePath: doc.filePath,
+                          title: title,
+                          documentId: doc.id!,
+                       );
+                     }
+                   },
+                   closedBuilder: (context, action) {
+                      return DocumentCardView(
+                        title: title,
+                        expiryDate: _parseDate(doc.expiryDate),
+                        status: doc.status,
+                        onTap: action,
+                        animationDelay: (index < 10 ? index * 50 : 500).ms,
+                      );
+                   }
+                ),
+              ),
             );
           },
         );
@@ -550,6 +649,42 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+  Widget _buildShimmerView() {
+    const bottomPadding = EdgeInsets.only(bottom: 100, left: 16, right: 16, top: 8);
+    switch (_viewMode) {
+      case ViewMode.grid:
+        return GridView.builder(
+          padding: bottomPadding,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.82, 
+          ),
+          itemCount: 6,
+          itemBuilder: (context, index) => const ShimmerPlaceholder(width: double.infinity, height: double.infinity, borderRadius: 32),
+        );
+      case ViewMode.list:
+        return ListView.builder(
+           padding: bottomPadding,
+           itemCount: 8,
+           itemBuilder: (context, index) => Padding(
+             padding: const EdgeInsets.only(bottom: 12),
+             child: const ShimmerPlaceholder(width: double.infinity, height: 80, borderRadius: 32),
+           ),
+        );
+      case ViewMode.card:
+        return ListView.builder(
+           padding: bottomPadding,
+           itemCount: 4,
+           itemBuilder: (context, index) => Padding(
+             padding: const EdgeInsets.only(bottom: 16),
+             child: const ShimmerPlaceholder(width: double.infinity, height: 220, borderRadius: 32),
+           ),
+        );
+    }
+  }
 }
+
 
 // Helper for BackdropFilter in Nav (Moved to top)

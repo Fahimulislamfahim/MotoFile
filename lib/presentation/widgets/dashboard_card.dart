@@ -8,6 +8,7 @@ class DashboardCard extends StatelessWidget {
   final String? expiryDate;
   final String status;
   final VoidCallback onTap;
+  final Duration animationDelay;
 
   const DashboardCard({
     super.key,
@@ -15,6 +16,7 @@ class DashboardCard extends StatelessWidget {
     required this.expiryDate,
     required this.status,
     required this.onTap,
+    this.animationDelay = Duration.zero,
   });
 
   Color get statusColor {
@@ -95,6 +97,6 @@ class DashboardCard extends StatelessWidget {
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0);
+    ).animate(delay: animationDelay).fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0);
   }
 }
