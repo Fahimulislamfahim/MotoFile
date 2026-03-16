@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/theme_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../widgets/glass_card.dart';
+import '../../core/services/backup_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -16,6 +17,26 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
+
+  Future<void> _handleBackup() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+    await BackupService().createBackup(context);
+    if (mounted) Navigator.pop(context); // close dialog
+  }
+
+  Future<void> _handleRestore() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+    await BackupService().restoreBackup(context);
+    if (mounted) Navigator.pop(context); // close dialog
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -133,11 +154,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Divider(height: 1, indent: 60, color: isDark ? Colors.white10 : Colors.black12),
                       _buildSettingTile(
                         context,
-                        icon: Icons.cloud_sync_rounded,
-                        title: 'Cloud Backup',
-                        subtitle: 'Last synced: Just now',
+                        icon: Icons.cloud_upload_rounded,
+                        title: 'Export Backup',
+                        subtitle: 'Save all your data to a file',
                         trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: isDark ? Colors.white24 : Colors.black26),
-                        onTap: () {},
+                        onTap: _handleBackup,
+                      ),
+                      Divider(height: 1, indent: 60, color: isDark ? Colors.white10 : Colors.black12),
+                      _buildSettingTile(
+                        context,
+                        icon: Icons.cloud_download_rounded,
+                        title: 'Import Backup',
+                        subtitle: 'Restore data from a backup file',
+                        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: isDark ? Colors.white24 : Colors.black26),
+                        onTap: _handleRestore,
                       ),
                     ],
                   ),
