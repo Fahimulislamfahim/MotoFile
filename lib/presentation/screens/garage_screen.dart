@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/services/vehicle_service.dart';
@@ -119,8 +120,8 @@ class _GarageScreenState extends State<GarageScreen> {
                           children: [
                             _buildInfoCard(context, 'License Plate', vehicle.licensePlate, Icons.pin_outlined),
                             _buildInfoCard(context, 'Color', vehicle.color, Icons.palette_outlined),
-                            _buildInfoCard(context, 'VIN / Chassis', vehicle.vin, Icons.fingerprint),
-                            _buildInfoCard(context, 'Engine No.', vehicle.engineNumber, Icons.engineering_outlined),
+                            _buildInfoCard(context, 'VIN / Chassis', vehicle.vin, Icons.view_in_ar_outlined),
+                            _buildInfoCard(context, 'Engine No.', vehicle.engineNumber, Icons.settings_input_component_outlined),
                           ],
                         ),
                         const SizedBox(height: 24),
@@ -316,15 +317,39 @@ class _GarageScreenState extends State<GarageScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 12),
-                                Text(
-                                  value,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    height: 1.2,
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          value,
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.bold,
+                                            height: 1.2,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      IconButton(
+                                        onPressed: () {
+                                          Clipboard.setData(ClipboardData(text: value));
+                                          final messenger = ScaffoldMessenger.of(context);
+                                          messenger.clearSnackBars();
+                                          messenger.showSnackBar(
+                                            SnackBar(
+                                              content: Text('$label copied to clipboard'),
+                                              behavior: SnackBarBehavior.floating,
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                              duration: const Duration(seconds: 1),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.copy_rounded, size: 24, color: AppColors.primaryLight),
+                                      ),
+                                    ],
                                   ),
-                                ),
                                 const SizedBox(height: 32),
                                 Text(
                                   'Tap outside to close',
