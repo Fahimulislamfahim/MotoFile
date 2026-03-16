@@ -18,7 +18,6 @@ class AppTheme {
     textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme).apply(
       bodyColor: AppColors.textPrimaryLight,
       displayColor: AppColors.textPrimaryLight,
-      fontSizeFactor: 0.9, // Scale down all fonts by 10%
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
@@ -98,7 +97,6 @@ class AppTheme {
     textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).apply(
       bodyColor: AppColors.textPrimaryDark,
       displayColor: AppColors.textPrimaryDark,
-      fontSizeFactor: 0.9, // Scale down all fonts by 10%
     ),
      appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,

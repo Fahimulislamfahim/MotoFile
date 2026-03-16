@@ -40,6 +40,14 @@ class MyApp extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             scrollbars: false,
           ),
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: const TextScaler.linear(0.9),
+              ),
+              child: child!,
+            );
+          },
           home: const SplashScreen(),
         );
       },
