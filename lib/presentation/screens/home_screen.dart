@@ -216,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
         drawer: const AppDrawer(),
         extendBody: true, // For glass bottom nav
         appBar: AppBar(
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22)), // Reduced from 24
           backgroundColor: Colors.transparent,
           elevation: 0,
           centerTitle: false,
@@ -254,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
         
         floatingActionButton: _buildFloatingActionButton(),
         
-        bottomNavigationBar: _buildGlassBottomNav(),
+        bottomNavigationBar: _buildBottomNav(),
       ),
     );
   }
@@ -281,8 +281,8 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             children: [
               GlassCard(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2), // Reduced vertical padding slightly for better centering
-                borderRadius: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0), // Tighter padding
+                borderRadius: 32, // Reduced from 40
                 child: TextField(
                   controller: _searchController,
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -294,12 +294,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     focusedBorder: InputBorder.none,
                     filled: false,
                     fillColor: Colors.transparent,
-                    contentPadding: EdgeInsets.symmetric(vertical: 14),
+                    contentPadding: EdgeInsets.symmetric(vertical: 12), // Reduced from 14
                   ),
                 ),
               ).animate().fadeIn().slideY(begin: -0.5, end: 0),
               
-              const SizedBox(height: 16),
+              const SizedBox(height: 12), // Reduced from 16
               
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -308,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: ['All', 'Expiring Soon', 'Expired', 'Missing'].map((filter) {
                     final isSelected = _filter == filter;
                     return Padding(
-                      padding: const EdgeInsets.only(right: 12),
+                      padding: const EdgeInsets.only(right: 8), // Tighter chip spacing
                       child: GestureDetector(
                         onTap: () {
                            setState(() {
@@ -318,7 +318,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6), // Reudced from 16, 8
                           decoration: BoxDecoration(
                             color: isSelected ? AppColors.primaryLight : Theme.of(context).cardColor.withOpacity(0.5),
                             borderRadius: BorderRadius.circular(20),
@@ -389,9 +389,9 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: bottomPadding,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.82, 
+            crossAxisSpacing: 12, // Tighter grid
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.85, // Adjust for tighter cards
           ),
           itemCount: _displayTypes.length,
           itemBuilder: (context, index) {
@@ -566,147 +566,60 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildGlassBottomNav() {
+  Widget _buildBottomNav() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
-      margin: const EdgeInsets.fromLTRB(24, 0, 24, 34),
-      height: 84,
+      margin: const EdgeInsets.only(left: 32, right: 32, bottom: 24),
+      height: 64, // Sleeker height
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(44),
+        color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.95) : Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+          width: 1,
+        ),
         boxShadow: [
-          // Ambient Shadow
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.4 : 0.2),
-            blurRadius: 30,
-            spreadRadius: -5,
-            offset: const Offset(0, 20),
+            color: AppColors.primaryLight.withOpacity(isDark ? 0.1 : 0.05),
+            blurRadius: 20,
+            spreadRadius: 2,
+            offset: const Offset(0, 10),
+          ),
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+               Expanded(
+                 child: _NavItem(
+                   icon: Icons.grid_view_rounded,
+                   label: 'Dashboard',
+                   isSelected: _currentIndex == 0,
+                   onTap: () => setState(() => _currentIndex = 0),
+                 ),
+               ),
+              Expanded(
+                child: _NavItem(
+                  icon: Icons.two_wheeler_rounded,
+                  label: 'Garage',
+                  isSelected: _currentIndex == 1,
+                  onTap: () => setState(() => _currentIndex = 1),
+                ),
+              ),
+            ],
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(44),
-        child: BackdropFilter(
-          filter: UI.ImageFilter.blur(sigmaX: 50, sigmaY: 50), // Heavy blur for bending
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(44),
-              border: Border.all(
-                color: Colors.white.withOpacity(isDark ? 0.05 : 0.25),
-                width: 0.5,
-              ),
-              // The "Clean Glass Lens" Gradient (Smooth)
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: const [0.0, 1.0], 
-                colors: [
-                  isDark ? Colors.white.withOpacity(0.12) : Colors.white.withOpacity(0.3), // Top half reflection
-                  isDark ? Colors.white.withOpacity(0.0) : Colors.white.withOpacity(0.02), // Bottom clear
-                ],
-              ),
-            ),
-            child: Stack(
-              children: [
-                // Top Reflection (Rim Light)
-                Positioned(
-                  top: 0, left: 30, right: 30, height: 1.5,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.white.withOpacity(0.0),
-                          Colors.white.withOpacity(0.9), // Bright specularity
-                          Colors.white.withOpacity(0.0),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Liquid Bubble/Droplet
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return AnimatedAlign(
-                      alignment: _currentIndex == 0 ? Alignment.centerLeft : Alignment.centerRight,
-                      duration: const Duration(milliseconds: 700),
-                      curve: Curves.fastLinearToSlowEaseIn,
-                      child: Container(
-                        width: constraints.maxWidth / 2,
-                        height: double.infinity,
-                        padding: const EdgeInsets.all(5),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            // Bubble Body
-                            color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(40),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.15),
-                              width: 0.5,
-                            ),
-                            boxShadow: [
-                               // Inner Light Glint (Simulated volume)
-                               BoxShadow(
-                                 color: Colors.white.withOpacity(isDark ? 0.05 : 0.6),
-                                 blurRadius: 15,
-                                 spreadRadius: -2,
-                                 offset: const Offset(-2, -4) // Top left light source
-                               ),
-                               BoxShadow(
-                                 color: Colors.black.withOpacity(0.1),
-                                 blurRadius: 10,
-                                 spreadRadius: -2,
-                                 offset: const Offset(2, 4) // Bottom right shadow
-                               )
-                            ],
-                          ),
-                          // Inner Gradient for convexity
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(40),
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Colors.white.withOpacity(isDark ? 0.1 : 0.4),
-                                  Colors.white.withOpacity(0.0),
-                                ]
-                              )
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                ),
-
-                 // Icons
-                Row(
-                  children: [
-                    Expanded(
-                      child: _LiquidNavItem(
-                        icon: Icons.grid_view_rounded,
-                        label: 'Dashboard',
-                        isSelected: _currentIndex == 0,
-                        onTap: () => setState(() => _currentIndex = 0),
-                      ),
-                    ),
-                    Expanded(
-                      child: _LiquidNavItem(
-                        icon: Icons.two_wheeler_rounded,
-                        label: 'Garage',
-                        isSelected: _currentIndex == 1,
-                        onTap: () => setState(() => _currentIndex = 1),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ).animate().slideY(begin: 1.2, end: 0, duration: 800.ms, curve: Curves.easeOutQuart);
+    ).animate().slideY(begin: 1.2, end: 0, duration: 600.ms, curve: Curves.easeOutQuart);
   }
 
   Widget? _buildFloatingActionButton() {
@@ -718,7 +631,7 @@ class _HomeScreenState extends State<HomeScreen> {
         foregroundColor: Colors.white,
         elevation: 8,
         shape: const CircleBorder(),
-        child: const Icon(Icons.add_rounded, size: 32),
+        child: const Icon(Icons.add_rounded, size: 28), // Reduced from 32
       ).animate(key: const ValueKey('fab_dashboard')).scale(duration: 300.ms, curve: Curves.easeOutBack);
     } else if (_currentIndex == 1) {
       // Garage FAB
@@ -737,7 +650,7 @@ class _HomeScreenState extends State<HomeScreen> {
         foregroundColor: Colors.white,
         elevation: 8,
         shape: const CircleBorder(),
-        child: const Icon(Icons.two_wheeler_rounded, size: 28),
+        child: const Icon(Icons.two_wheeler_rounded, size: 24), // Reduced from 28
       ).animate(key: const ValueKey('fab_garage')).scale(duration: 300.ms, curve: Curves.easeOutBack);
     }
     return null;
@@ -780,13 +693,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _LiquidNavItem extends StatefulWidget {
+class _NavItem extends StatefulWidget {
   final IconData icon;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _LiquidNavItem({
+  const _NavItem({
     required this.icon,
     required this.label,
     required this.isSelected,
@@ -794,17 +707,17 @@ class _LiquidNavItem extends StatefulWidget {
   });
 
   @override
-  State<_LiquidNavItem> createState() => _LiquidNavItemState();
+  State<_NavItem> createState() => _NavItemState();
 }
 
-class _LiquidNavItemState extends State<_LiquidNavItem> {
+class _NavItemState extends State<_NavItem> {
   bool _isPressed = false;
 
   @override
   Widget build(BuildContext context) {
-    // IOS colors
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final selectedColor = AppColors.primaryLight;
-    final unselectedColor = const Color(0xFF8E8E93);
+    final unselectedColor = isDark ? Colors.white54 : Colors.black45;
 
     return GestureDetector(
       onTap: () {
@@ -815,60 +728,59 @@ class _LiquidNavItemState extends State<_LiquidNavItem> {
       onTapUp: (_) => setState(() => _isPressed = false),
       onTapCancel: () => setState(() => _isPressed = false),
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        height: 80,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        margin: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: widget.isSelected
+              ? AppColors.primaryLight.withOpacity(0.12)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(26),
+        ),
         child: AnimatedScale(
-          scale: _isPressed ? 0.9 : 1.0,
+          scale: _isPressed ? 0.92 : 1.0,
           duration: const Duration(milliseconds: 150),
-          curve: Curves.easeOutQuad,
-          child: Center(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
-              switchInCurve: Curves.easeOutBack,
-              switchOutCurve: Curves.easeInBack,
-              transitionBuilder: (child, anim) {
-                 return SlideTransition(
-                   position: Tween<Offset>(
-                     begin: const Offset(0, 0.2), 
-                     end: Offset.zero
-                   ).animate(anim),
-                   child: FadeTransition(opacity: anim, child: child),
-                 );
-              },
-              child: widget.isSelected 
-                ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    key: ValueKey('selected_${widget.label}'),
-                    children: [
-                      Icon(widget.icon, color: selectedColor, size: 26)
-                        .animate().shimmer(duration: 800.ms, color: Colors.white.withOpacity(0.5)),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          widget.label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: selectedColor,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.3, // iOS tight tracking
-                            fontSize: 16,
-                          ),
-                        ),
+          curve: Curves.easeOutCubic,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            // mainAxisSize: MainAxisSize.min, // Need it to fill expanded
+            children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) => 
+                  ScaleTransition(scale: animation, child: child),
+                child: Icon(
+                  widget.icon,
+                  key: ValueKey<bool>(widget.isSelected),
+                  color: widget.isSelected ? selectedColor : unselectedColor,
+                  size: 24, // slightly smaller icon
+                ),
+              ),
+              ClipRect(
+                child: AnimatedAlign(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutQuint,
+                  alignment: Alignment.centerLeft,
+                  widthFactor: widget.isSelected ? 1.0 : 0.0,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      widget.label,
+                      style: TextStyle(
+                        color: selectedColor,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14, // smaller font
+                        letterSpacing: -0.2,
                       ),
-                    ],
-                  )
-                : Icon(
-                    widget.icon, 
-                    key: ValueKey('unselected_${widget.label}'),
-                    color: unselectedColor, 
-                    size: 26
+                    ),
                   ),
-            ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 }
-// Helper for BackdropFilter in Nav (Moved to top)

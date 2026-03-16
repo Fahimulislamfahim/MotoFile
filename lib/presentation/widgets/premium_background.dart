@@ -30,10 +30,12 @@ class PremiumBackground extends StatelessWidget {
             height: 350,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primaryLight.withOpacity(0.15),
-              boxShadow: [
-                BoxShadow(color: AppColors.primaryLight.withOpacity(0.1), blurRadius: 100, spreadRadius: 20),
-              ],
+              gradient: RadialGradient(
+                colors: [
+                  AppColors.primaryLight.withOpacity(0.25),
+                  AppColors.primaryLight.withOpacity(0.0),
+                ],
+              ),
             ),
           ).animate(onPlay: (c) => c.repeat(reverse: true))
            .scale(begin: const Offset(1,1), end: const Offset(1.3,1.3), duration: 10.seconds)
@@ -49,10 +51,12 @@ class PremiumBackground extends StatelessWidget {
             height: 300,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.accentLight.withOpacity(0.1),
-              boxShadow: [
-                BoxShadow(color: AppColors.accentLight.withOpacity(0.05), blurRadius: 80, spreadRadius: 20),
-              ],
+              gradient: RadialGradient(
+                colors: [
+                  AppColors.accentLight.withOpacity(0.2),
+                  AppColors.accentLight.withOpacity(0.0),
+                ],
+              ),
             ),
           ).animate(onPlay: (c) => c.repeat(reverse: true))
            .moveY(begin: 0, end: 50, duration: 8.seconds)
@@ -68,21 +72,20 @@ class PremiumBackground extends StatelessWidget {
             height: 200,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: (isDark ? Colors.purple : Colors.blue).withOpacity(0.05),
-              boxShadow: [
-                BoxShadow(color: (isDark ? Colors.purple : Colors.blue).withOpacity(0.05), blurRadius: 60),
-              ],
+              gradient: RadialGradient(
+                colors: [
+                  (isDark ? Colors.purple : Colors.blue).withOpacity(0.15),
+                  (isDark ? Colors.purple : Colors.blue).withOpacity(0.0),
+                ],
+              ),
             ),
           ).animate(onPlay: (c) => c.repeat(reverse: true))
            .fadeIn(duration: 2.seconds)
            .moveX(begin: 0, end: 40, duration: 6.seconds),
         ),
 
-        // Glassmorphism Blur
-        BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-          child: Container(color: Colors.transparent),
-        ),
+        // Glassmorphism Blur (Removed for Performance)
+        // Now using RadialGradients to simulate blur cleanly.
 
         // Content
         SafeArea(child: child),

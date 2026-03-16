@@ -29,8 +29,8 @@ class DashboardCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GlassCard(
       onTap: onTap,
-      padding: const EdgeInsets.all(16),
-      borderRadius: 32, // More roundish
+      padding: const EdgeInsets.all(12), // Reduced from 16
+      borderRadius: 24, // Reduced from 32
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -39,7 +39,7 @@ class DashboardCard extends StatelessWidget {
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: 14, // Reduced from 16
             ),
           ),
           Column(
@@ -47,17 +47,17 @@ class DashboardCard extends StatelessWidget {
             children: [
               Text(
                 expiryDate != null ? 'Expires: $expiryDate' : 'No Expiry Date',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 12, 
-                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7)
+                style: Theme.of(context).textTheme.bodySmall?.copyWith( // changed from bodyMedium
+                  fontSize: 11, // Reduced from 12
+                  color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7)
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8), // Reduced from 12
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Reduced from 10, 6
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8), // Reduced from 12
                   border: Border.all(color: statusColor.withOpacity(0.3)),
                   boxShadow: [
                     BoxShadow(
@@ -81,13 +81,13 @@ class DashboardCard extends StatelessWidget {
                         ]
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6), // Reduced from 8
                     Text(
                       status,
                       style: TextStyle(
                         color: statusColor,
                         fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                        fontSize: 11, // Reduced from 12
                       ),
                     ),
                   ],

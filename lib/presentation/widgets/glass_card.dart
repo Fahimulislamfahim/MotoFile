@@ -56,11 +56,7 @@ class _GlassCardState extends State<GlassCard> {
         duration: const Duration(milliseconds: 100),
         curve: Curves.easeInOut,
         child: RepaintBoundary(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: GestureDetector(
+          child: GestureDetector(
               onTap: widget.onTap,
               onTapDown: _onTapDown,
               onTapUp: _onTapUp,
@@ -70,8 +66,8 @@ class _GlassCardState extends State<GlassCard> {
                 padding: widget.padding ?? const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: isDark 
-                      ? Colors.white.withOpacity(0.05) 
-                      : Colors.white.withOpacity(0.6),
+                      ? Colors.white.withOpacity(0.08) 
+                      : Colors.white.withOpacity(0.85),
                   borderRadius: BorderRadius.circular(widget.borderRadius),
                   border: Border.all(
                     color: isDark
@@ -91,8 +87,6 @@ class _GlassCardState extends State<GlassCard> {
                 child: widget.child,
               ),
             ),
-            ),
-        ),
         ),
       ),
     );

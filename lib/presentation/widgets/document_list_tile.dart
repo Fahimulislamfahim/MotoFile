@@ -44,25 +44,25 @@ class DocumentListTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: GlassCard(
         onTap: onTap,
-        padding: const EdgeInsets.all(16),
-        borderRadius: 32, // Roundish
+        padding: const EdgeInsets.all(12), // Reduced from 16
+        borderRadius: 24, // Reduced from 32
         child: Row(
           children: [
             // Status Icon with Glow
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10), // Reduced from 12
               decoration: BoxDecoration(
                 color: _getStatusColor().withOpacity(0.1),
-                borderRadius: BorderRadius.circular(24), // Keep icon container slightly less round or match? Let's go 24.
+                borderRadius: BorderRadius.circular(16), // Reduced from 24
                 border: Border.all(color: _getStatusColor().withOpacity(0.2)),
               ),
               child: Icon(
                 _getStatusIcon(),
                 color: _getStatusColor(),
-                size: 24,
+                size: 20, // Reduced from 24
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12), // Reduced from 16
             // Title and Date
             Expanded(
               child: Column(
@@ -72,9 +72,10 @@ class DocumentListTile extends StatelessWidget {
                     title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
+                          fontSize: 15, // Slightly smaller title
                         ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2), // Reduced from 4
                   if (expiryDate != null)
                     Text(
                       'Expires: ${DateFormat('MMM dd, yyyy').format(expiryDate!)}',
@@ -95,10 +96,10 @@ class DocumentListTile extends StatelessWidget {
             ),
             // Status Badge
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), // Reduced from 12, 6
               decoration: BoxDecoration(
                 color: _getStatusColor().withOpacity(0.1),
-                borderRadius: BorderRadius.circular(40), // Stadium
+                borderRadius: BorderRadius.circular(32), // Reduced from 40
                 border: Border.all(
                   color: _getStatusColor().withOpacity(0.3),
                 ),
@@ -108,7 +109,7 @@ class DocumentListTile extends StatelessWidget {
                 style: TextStyle(
                   color: _getStatusColor(),
                   fontWeight: FontWeight.bold,
-                  fontSize: 12,
+                  fontSize: 11, // Reduced from 12
                 ),
               ),
             ),
