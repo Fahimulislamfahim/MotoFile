@@ -19,7 +19,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path, 
-      version: 6, 
+      version: 8, 
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -31,6 +31,7 @@ class DatabaseHelper {
     await _createServiceLogTable(db);
     await _createFuelLogTable(db);
     await _createReminderTable(db);
+    await _createDailyLogTable(db);
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -51,6 +52,16 @@ class DatabaseHelper {
         await db.execute('ALTER TABLE vehicles ADD COLUMN image_path TEXT');
       } catch (e) {
         print("Error adding image_path column: $e");
+      }
+    }
+    if (oldVersion < 7) {
+      await _createDailyLogTable(db);
+    }
+    if (oldVersion < 8) {
+      try {
+        await db.execute('ALTER TABLE daily_logs ADD COLUMN time TEXT');
+      } catch (e) {
+        print("Error adding time column to daily_logs: $e");
       }
     }
   }
@@ -128,6 +139,25 @@ CREATE TABLE service_logs (
   cost $realType,
   odometer $intType,
   notes $textTypeNullable
+)
+''');
+  }
+
+  Future _createDailyLogTable(Database db) async {
+    const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
+    const intType = 'INTEGER NOT NULL';
+    const textType = 'TEXT NOT NULL';
+    const textTypeNullable = 'TEXT';
+    const realTypeNullable = 'REAL';
+
+    await db.execute('''
+CREATE TABLE daily_logs (
+  id $idType,
+  vehicle_id $intType,
+  date $textType,
+  time $textTypeNullable,
+  odometer $intType,
+  fuel_added $realTypeNullable
 )
 ''');
   }

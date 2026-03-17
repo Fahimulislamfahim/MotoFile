@@ -12,6 +12,7 @@ import 'service_history_screen.dart';
 import 'fuel_history_screen.dart';
 import 'reminders_screen.dart';
 import 'analytics_screen.dart';
+import 'daily_log_screen.dart';
 
 class GarageScreen extends StatefulWidget {
   const GarageScreen({super.key});
@@ -189,6 +190,10 @@ class _GarageScreenState extends State<GarageScreen> {
                                 Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
                                 _buildActionRow(context, 'Maintenance Reminders', Icons.notifications_active_rounded, () {
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => RemindersScreen(vehicle: vehicle)));
+                                }),
+                                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                                _buildActionRow(context, 'Daily Log & Calendar', Icons.calendar_month_rounded, () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => DailyLogScreen(vehicle: vehicle)));
                                 }),
                                 Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
                                 _buildActionRow(context, 'Analytics & Charts', Icons.bar_chart_rounded, () {

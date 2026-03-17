@@ -1,5 +1,5 @@
 // Define kotlin_version for plugins that rely on it
-val kotlin_version by extra("1.9.23")
+val kotlin_version by extra("2.1.0")
 
 allprojects {
     repositories {

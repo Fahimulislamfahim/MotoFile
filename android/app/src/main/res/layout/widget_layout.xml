@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="12dp"
+    android:background="@drawable/widget_background">
+
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MotoFile"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widget_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Daily Companion"
+            android:textColor="#94A3B8"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/stats_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/stat_item_background"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/distance_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-- km"
+                android:textColor="#0EA5E9"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Distance Today"
+                android:textColor="#94A3B8"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/stat_item_background"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/mileage_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-- km/L"
+                android:textColor="#10B981"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Fuel Mileage"
+                android:textColor="#94A3B8"
+                android:textSize="10sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/widget_button"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/stats_container"
+        android:background="#0EA5E9"
+        android:text="Add Daily Log"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+</RelativeLayout>

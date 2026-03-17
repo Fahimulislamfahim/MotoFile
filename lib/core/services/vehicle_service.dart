@@ -2,17 +2,23 @@ import '../../data/daos/vehicle_dao.dart';
 import '../../data/daos/service_log_dao.dart';
 import '../../data/daos/fuel_log_dao.dart';
 import '../../data/daos/reminder_dao.dart';
+import '../../data/daos/daily_log_dao.dart';
 import '../../data/models/vehicle_model.dart';
 import '../../data/models/service_log_model.dart';
 import '../../data/models/fuel_log_model.dart';
 import '../../data/models/reminder_model.dart';
+import '../../data/models/daily_log_model.dart';
 import 'package:flutter/foundation.dart';
+import 'package:home_widget/home_widget.dart';
+import 'package:intl/intl.dart';
+
 
 class VehicleService extends ChangeNotifier {
   final _vehicleDao = VehicleDao();
   final _serviceLogDao = ServiceLogDao();
   final _fuelLogDao = FuelLogDao();
   final _reminderDao = ReminderDao();
+  final _dailyLogDao = DailyLogDao();
   
   List<Vehicle> _vehicles = [];
   bool _isLoading = false;
@@ -95,6 +101,81 @@ class VehicleService extends ChangeNotifier {
 
   Future<void> deleteReminder(int id) async {
     await _reminderDao.delete(id);
+    notifyListeners();
+  }
+
+  // Daily Logs
+  Future<List<DailyLog>> getDailyLogs(int vehicleId) async {
+    return await _dailyLogDao.readByVehicle(vehicleId);
+  }
+
+  Future<void> saveDailyLog(DailyLog log) async {
+    final existingLog = await _dailyLogDao.readByDate(log.vehicleId, log.date);
+    if (existingLog != null) {
+      final updatedLog = DailyLog(
+        id: existingLog.id,
+        vehicleId: log.vehicleId,
+        date: log.date,
+        time: log.time,
+        odometer: log.odometer,
+        fuelAdded: log.fuelAdded,
+      );
+      await _dailyLogDao.update(updatedLog);
+    } else {
+      await _dailyLogDao.create(log);
+    }
+
+    if (log.fuelAdded != null && log.fuelAdded! > 0) {
+      // Create a corresponding FuelLog
+      final fuelLog = FuelLog(
+        vehicleId: log.vehicleId,
+        date: log.date,
+        liters: log.fuelAdded!,
+        pricePerLiter: 0.0,
+        totalCost: 0.0,
+        odometer: log.odometer,
+      );
+      await addFuelLog(fuelLog);
+    } else {
+      notifyListeners();
+    }
+    
+    // Update Home Widget Stats
+    await updateWidgetStats(log.vehicleId);
+  }
+
+  Future<void> updateWidgetStats(int vehicleId) async {
+    final logs = await _dailyLogDao.readByVehicle(vehicleId);
+    if (logs.isEmpty) return;
+
+    // Sort ascending by date
+    logs.sort((a, b) => a.date.compareTo(b.date));
+
+    final latestLog = logs.last;
+    int distance = 0;
+    double? mileage;
+
+    if (logs.length > 1) {
+      final prevLog = logs[logs.length - 2];
+      distance = latestLog.odometer - prevLog.odometer;
+      
+      if (latestLog.fuelAdded != null && latestLog.fuelAdded! > 0 && distance > 0) {
+        mileage = distance / latestLog.fuelAdded!;
+      }
+    }
+
+    // Push to HomeWidget
+    await HomeWidget.saveWidgetData<String>('distance_text', '$distance km');
+    await HomeWidget.saveWidgetData<String>('mileage_text', mileage != null ? '${mileage.toStringAsFixed(1)} km/L' : 'N/A');
+    
+    await HomeWidget.updateWidget(
+      name: 'DailyLogWidgetProvider',
+      androidName: 'com.vynix.motofile.DailyLogWidgetProvider',
+    );
+  }
+
+  Future<void> deleteDailyLog(int id) async {
+    await _dailyLogDao.delete(id);
     notifyListeners();
   }
 }
