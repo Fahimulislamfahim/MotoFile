@@ -49,19 +49,19 @@ class DashboardCard extends StatelessWidget {
                 expiryDate != null ? 'Expires: $expiryDate' : 'No Expiry Date',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith( // changed from bodyMedium
                   fontSize: 11, // Reduced from 12
-                  color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7)
+                  color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7)
                 ),
               ),
               const SizedBox(height: 8), // Reduced from 12
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Reduced from 10, 6
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
+                  color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8), // Reduced from 12
-                  border: Border.all(color: statusColor.withOpacity(0.3)),
+                  border: Border.all(color: statusColor.withValues(alpha: 0.3)),
                   boxShadow: [
                     BoxShadow(
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                       blurRadius: 10,
                       spreadRadius: -2,
                     )
@@ -77,7 +77,7 @@ class DashboardCard extends StatelessWidget {
                         color: statusColor,
                         shape: BoxShape.circle,
                         boxShadow: [
-                            BoxShadow(color: statusColor.withOpacity(0.5), blurRadius: 6)
+                            BoxShadow(color: statusColor.withValues(alpha: 0.5), blurRadius: 6)
                         ]
                       ),
                     ),

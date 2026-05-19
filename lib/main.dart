@@ -6,7 +6,6 @@ import 'presentation/screens/splash_screen.dart';
 import 'presentation/screens/daily_log_screen.dart';
 import 'core/services/notification_service.dart';
 
-import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_service.dart';
 import 'core/services/vehicle_service.dart';
@@ -47,7 +46,7 @@ class _MyAppState extends State<MyApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
        final vehicleService = Provider.of<VehicleService>(context, listen: false);
        vehicleService.loadVehicles().then((_) {
-         if (vehicleService.vehicles.isNotEmpty) {
+         if (vehicleService.vehicles.isNotEmpty && context.mounted) {
            vehicleService.updateWidgetStats(vehicleService.vehicles.first.id!);
          }
        });
@@ -75,12 +74,12 @@ class _MyAppState extends State<MyApp> {
   void _navigateLogScreen() {
     Future.delayed(const Duration(milliseconds: 800), () async {
       final context = navigatorKey.currentContext;
-      if (context != null) {
+      if (context != null && context.mounted) {
         final vehicleService = Provider.of<VehicleService>(context, listen: false);
         if (vehicleService.vehicles.isEmpty) {
           await vehicleService.loadVehicles();
         }
-        if (vehicleService.vehicles.isNotEmpty) {
+        if (vehicleService.vehicles.isNotEmpty && context.mounted) {
            Navigator.push(
              context,
              MaterialPageRoute(

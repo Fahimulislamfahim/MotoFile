@@ -87,7 +87,7 @@ class _FuelHistoryScreenState extends State<FuelHistoryScreen> {
       if (dist <= 0) return '-'; 
       
       final efficiency = dist / current.liters;
-      return '${efficiency.toStringAsFixed(1)}';
+      return efficiency.toStringAsFixed(1);
   }
 
   @override
@@ -134,17 +134,17 @@ class _FuelHistoryScreenState extends State<FuelHistoryScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.local_gas_station_rounded, size: 64, color: Colors.grey.withOpacity(0.5)),
+                              Icon(Icons.local_gas_station_rounded, size: 64, color: Colors.grey.withValues(alpha: 0.5)),
                               const SizedBox(height: 16),
                               Text(
                                 'No Fuel Logs Yet',
                                 style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.grey.withOpacity(0.7)),
+                                    color: Colors.grey.withValues(alpha: 0.7)),
                               ),
                               const SizedBox(height: 8),
-                              Text('Log refills to track mileage.', style: TextStyle(color: Colors.grey.withOpacity(0.5))),
+                              Text('Log refills to track mileage.', style: TextStyle(color: Colors.grey.withValues(alpha: 0.5))),
                             ],
                           ),
                         )
@@ -166,7 +166,7 @@ class _FuelHistoryScreenState extends State<FuelHistoryScreen> {
                                       Container(
                                           padding: const EdgeInsets.all(10),
                                           decoration: BoxDecoration(
-                                              color: AppColors.primaryLight.withOpacity(0.1),
+                                              color: AppColors.primaryLight.withValues(alpha: 0.1),
                                               borderRadius: BorderRadius.circular(20) // Rounder
                                           ),
                                           child: Icon(Icons.water_drop_rounded, color: AppColors.primaryLight)
@@ -183,7 +183,7 @@ class _FuelHistoryScreenState extends State<FuelHistoryScreen> {
                                             const SizedBox(height: 4),
                                             Text(
                                               '${log.odometer} km • ${log.liters} L',
-                                              style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7), fontSize: 13),
+                                              style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7), fontSize: 13),
                                             ),
                                           ],
                                         ),
@@ -200,9 +200,9 @@ class _FuelHistoryScreenState extends State<FuelHistoryScreen> {
                                                       margin: const EdgeInsets.only(top: 4),
                                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                                       decoration: BoxDecoration(
-                                                          color: AppColors.success.withOpacity(0.1),
+                                                          color: AppColors.success.withValues(alpha: 0.1),
                                                           borderRadius: BorderRadius.circular(16), // Rounder
-                                                          border: Border.all(color: AppColors.success.withOpacity(0.2))
+                                                          border: Border.all(color: AppColors.success.withValues(alpha: 0.2))
                                                       ),
                                                       child: Text('$efficiency km/L', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.success))
                                                   )
@@ -210,7 +210,7 @@ class _FuelHistoryScreenState extends State<FuelHistoryScreen> {
                                       ),
                                       const SizedBox(width: 8),
                                       PopupMenuButton(
-                                        icon: Icon(Icons.more_vert_rounded, size: 20, color: Colors.grey.withOpacity(0.7)),
+                                        icon: Icon(Icons.more_vert_rounded, size: 20, color: Colors.grey.withValues(alpha: 0.7)),
                                         color: Theme.of(context).cardColor,
                                         elevation: 4,
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

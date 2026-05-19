@@ -1,10 +1,8 @@
-import 'dart:ui' as UI;
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:animations/animations.dart';
-import '../../core/theme/theme_service.dart';
 import '../../core/services/card_order_service.dart';
 import '../../core/services/view_mode_service.dart';
 import '../../data/daos/document_dao.dart';
@@ -172,25 +170,6 @@ class _HomeScreenState extends State<HomeScreen> {
      // Optional: Feedback (removed SnackBar to reduce clutter, or keep it subtle)
   }
 
-  void _navigateToDocument(String title) {
-    final doc = _getDocumentForType(title);
-    if (doc.status == 'Missing') {
-      _navigateToAddDocument(title);
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PDFViewerScreen(
-            filePath: doc.filePath,
-            title: title,
-            documentId: doc.id!,
-          ),
-        ),
-      ).then((value) {
-        if (value == true) _refreshDocuments();
-      });
-    }
-  }
 
   Future<void> _navigateToAddDocument(String? preselectedType) async {
     final result = await Navigator.push(
@@ -249,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           child: _currentIndex == 0 
             ? KeyedSubtree(key: const ValueKey('Dashboard'), child: _buildDashboardContent())
-            : const KeyedSubtree(key: const ValueKey('Garage'), child: GarageScreen()),
+            : const KeyedSubtree(key: ValueKey('Garage'), child: GarageScreen()),
         ),
         
         floatingActionButton: _buildFloatingActionButton(),
@@ -320,13 +299,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6), // Reudced from 16, 8
                           decoration: BoxDecoration(
-                            color: isSelected ? AppColors.primaryLight : Theme.of(context).cardColor.withOpacity(0.5),
+                            color: isSelected ? AppColors.primaryLight : Theme.of(context).cardColor.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: isSelected ? AppColors.primaryLight : Colors.transparent
                             ),
                             boxShadow: isSelected ? [
-                               BoxShadow(color: AppColors.primaryLight.withOpacity(0.4), blurRadius: 8, spreadRadius: 1)
+                               BoxShadow(color: AppColors.primaryLight.withValues(alpha: 0.4), blurRadius: 8, spreadRadius: 1)
                             ] : [],
                           ),
                           child: Text(
@@ -356,9 +335,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? Center(child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.folder_off_outlined, size: 64, color: Colors.grey.withOpacity(0.5)),
+                        Icon(Icons.folder_off_outlined, size: 64, color: Colors.grey.withValues(alpha: 0.5)),
                         const SizedBox(height: 16),
-                        Text('No documents found', style: TextStyle(color: Colors.grey.withOpacity(0.8), fontSize: 16)),
+                        Text('No documents found', style: TextStyle(color: Colors.grey.withValues(alpha: 0.8), fontSize: 16)),
                       ],
                     ))
                   : ShaderMask(
@@ -573,22 +552,22 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.only(left: 32, right: 32, bottom: 24),
       height: 64, // Sleeker height
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E).withOpacity(0.95) : Colors.white.withOpacity(0.95),
+        color: isDark ? const Color(0xFF1E1E1E).withValues(alpha: 0.95) : Colors.white.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(32),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryLight.withOpacity(isDark ? 0.1 : 0.05),
+            color: AppColors.primaryLight.withValues(alpha: isDark ? 0.1 : 0.05),
             blurRadius: 20,
             spreadRadius: 2,
             offset: const Offset(0, 10),
           ),
           if (!isDark)
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -636,15 +615,14 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (_currentIndex == 1) {
       // Garage FAB
       return FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final value = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AddEditVehicleScreen()),
-          ).then((value) {
-            if (value == true) {
-               Provider.of<VehicleService>(context, listen: false).loadVehicles();
-            }
-          });
+          );
+          if (value == true && mounted) {
+             Provider.of<VehicleService>(context, listen: false).loadVehicles();
+          }
         },
         backgroundColor: AppColors.primaryLight,
         foregroundColor: Colors.white,
@@ -734,7 +712,7 @@ class _NavItemState extends State<_NavItem> {
         margin: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: widget.isSelected
-              ? AppColors.primaryLight.withOpacity(0.12)
+              ? AppColors.primaryLight.withValues(alpha: 0.12)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(26),
         ),

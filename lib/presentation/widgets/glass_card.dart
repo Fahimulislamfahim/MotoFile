@@ -1,7 +1,5 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/theme_service.dart';
 
 class GlassCard extends StatefulWidget {
@@ -66,18 +64,18 @@ class _GlassCardState extends State<GlassCard> {
                 padding: widget.padding ?? const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: isDark 
-                      ? Colors.white.withOpacity(0.08) 
-                      : Colors.white.withOpacity(0.85),
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.white.withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(widget.borderRadius),
                   border: Border.all(
                     color: isDark
-                        ? Colors.white.withOpacity(0.1)
-                        : Colors.white.withOpacity(0.4),
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : Colors.white.withValues(alpha: 0.4),
                     width: 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       spreadRadius: 0,
                       offset: const Offset(0, 5),

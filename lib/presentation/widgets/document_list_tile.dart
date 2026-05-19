@@ -52,9 +52,9 @@ class DocumentListTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10), // Reduced from 12
               decoration: BoxDecoration(
-                color: _getStatusColor().withOpacity(0.1),
+                color: _getStatusColor().withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16), // Reduced from 24
-                border: Border.all(color: _getStatusColor().withOpacity(0.2)),
+                border: Border.all(color: _getStatusColor().withValues(alpha: 0.2)),
               ),
               child: Icon(
                 _getStatusIcon(),
@@ -80,14 +80,14 @@ class DocumentListTile extends StatelessWidget {
                     Text(
                       'Expires: ${DateFormat('MMM dd, yyyy').format(expiryDate!)}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                            color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                           ),
                     )
                   else
                     Text(
                       status == 'Missing' ? 'Tap to add' : 'No expiry date',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                            color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                             fontStyle: FontStyle.italic,
                           ),
                     ),
@@ -98,10 +98,10 @@ class DocumentListTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), // Reduced from 12, 6
               decoration: BoxDecoration(
-                color: _getStatusColor().withOpacity(0.1),
+                color: _getStatusColor().withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(32), // Reduced from 40
                 border: Border.all(
-                  color: _getStatusColor().withOpacity(0.3),
+                  color: _getStatusColor().withValues(alpha: 0.3),
                 ),
               ),
               child: Text(

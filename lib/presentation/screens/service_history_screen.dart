@@ -81,17 +81,17 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.history_rounded, size: 64, color: Colors.grey.withOpacity(0.5)),
+                        Icon(Icons.history_rounded, size: 64, color: Colors.grey.withValues(alpha: 0.5)),
                         const SizedBox(height: 16),
                         Text(
                           'No Service Logs Yet',
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.grey.withOpacity(0.7)),
+                              color: Colors.grey.withValues(alpha: 0.7)),
                         ),
                         const SizedBox(height: 8),
-                        Text('Track your maintenance here.', style: TextStyle(color: Colors.grey.withOpacity(0.5))),
+                        Text('Track your maintenance here.', style: TextStyle(color: Colors.grey.withValues(alpha: 0.5))),
                       ],
                     ),
                   )
@@ -110,7 +110,7 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primaryLight.withOpacity(0.1),
+                                    color: AppColors.primaryLight.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(12)
                                   ),
                                   child: Icon(_getServiceIcon(log.serviceType), color: AppColors.primaryLight)
@@ -127,7 +127,7 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
                                       const SizedBox(width: 4),
                                       Text(
                                         '${log.date} • ${log.odometer} km',
-                                        style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7), fontSize: 13),
+                                        style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7), fontSize: 13),
                                       ),
                                     ],
                                   ),
@@ -140,7 +140,7 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                      ),
                                      IconButton(
-                                        icon: Icon(Icons.delete_outline_rounded, size: 20, color: AppColors.error.withOpacity(0.7)),
+                                        icon: Icon(Icons.delete_outline_rounded, size: 20, color: AppColors.error.withValues(alpha: 0.7)),
                                         onPressed: () {
                                            showDialog(
                                              context: context,

@@ -147,7 +147,7 @@ class _DailyLogScreenState extends State<DailyLogScreen> {
     final odometer = int.tryParse(odoText) ?? 0;
     final fuelAdded = fuelText.isNotEmpty ? double.tryParse(fuelText) : null;
     final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
-    final isToday = dateStr == DateFormat('yyyy-MM-dd').format(DateTime.now());
+
     
     // Only capture time if they are editing/adding today's log, or optionally handle past times. Let's just capture current time.
     final timeStr = DateFormat('HH:mm:ss').format(DateTime.now());
@@ -164,9 +164,11 @@ class _DailyLogScreenState extends State<DailyLogScreen> {
     final service = Provider.of<VehicleService>(context, listen: false);
     await service.saveDailyLog(log);
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Daily log saved!')),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Daily log saved!')),
+      );
+    }
     
     _loadLogs(); // Reload data
   }
@@ -224,7 +226,7 @@ class _DailyLogScreenState extends State<DailyLogScreen> {
                           TextButton(
                             onPressed: _goToToday,
                             style: TextButton.styleFrom(
-                              backgroundColor: AppColors.primaryLight.withOpacity(0.1),
+                              backgroundColor: AppColors.primaryLight.withValues(alpha: 0.1),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                             ),
                             child: Text('Today', style: TextStyle(color: AppColors.primaryLight, fontWeight: FontWeight.bold)),
@@ -255,7 +257,7 @@ class _DailyLogScreenState extends State<DailyLogScreen> {
                               decoration: BoxDecoration(
                                 color: isSelected 
                                     ? AppColors.primaryLight 
-                                    : (isCurrentDay ? AppColors.primaryLight.withOpacity(0.2) : Theme.of(context).cardColor.withOpacity(0.5)),
+                                    : (isCurrentDay ? AppColors.primaryLight.withValues(alpha: 0.2) : Theme.of(context).cardColor.withValues(alpha: 0.5)),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: isCurrentDay && !isSelected 
@@ -264,7 +266,7 @@ class _DailyLogScreenState extends State<DailyLogScreen> {
                                   width: 2,
                                 ),
                                 boxShadow: isSelected ? [
-                                  BoxShadow(color: AppColors.primaryLight.withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4))
+                                  BoxShadow(color: AppColors.primaryLight.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))
                                 ] : null,
                               ),
                               child: Column(
@@ -332,11 +334,11 @@ class _DailyLogScreenState extends State<DailyLogScreen> {
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  Icon(Icons.access_time_rounded, size: 14, color: Colors.grey.withOpacity(0.8)),
+                                  Icon(Icons.access_time_rounded, size: 14, color: Colors.grey.withValues(alpha: 0.8)),
                                   const SizedBox(width: 4),
                                   Text(
                                     'Last saved at: ${_formatTime(_currentLog!.time!)}',
-                                    style: TextStyle(color: Colors.grey.withOpacity(0.8), fontSize: 13),
+                                    style: TextStyle(color: Colors.grey.withValues(alpha: 0.8), fontSize: 13),
                                   ),
                                 ],
                               ),
@@ -350,7 +352,7 @@ class _DailyLogScreenState extends State<DailyLogScreen> {
                                 labelText: 'Odometer (km)',
                                 prefixIcon: Icon(Icons.speed_rounded, color: AppColors.primaryLight),
                                 filled: true,
-                                fillColor: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
+                                fillColor: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                               ),
                             ),
@@ -363,7 +365,7 @@ class _DailyLogScreenState extends State<DailyLogScreen> {
                                 labelText: 'Fuel Added (Liters) - Optional',
                                 prefixIcon: Icon(Icons.local_gas_station_rounded, color: AppColors.accentLight),
                                 filled: true,
-                                fillColor: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
+                                fillColor: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                               ),
                             ),
@@ -433,7 +435,7 @@ class _DailyLogScreenState extends State<DailyLogScreen> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: color, size: 28),
@@ -441,7 +443,7 @@ class _DailyLogScreenState extends State<DailyLogScreen> {
         const SizedBox(height: 12),
         Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(label, style: TextStyle(color: Colors.grey.withOpacity(0.8), fontSize: 14)),
+        Text(label, style: TextStyle(color: Colors.grey.withValues(alpha: 0.8), fontSize: 14)),
       ],
     );
   }

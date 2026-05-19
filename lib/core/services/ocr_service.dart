@@ -1,10 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'dart:io';
 
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:intl/intl.dart';
 
 import 'package:printing/printing.dart';
-import 'package:flutter/services.dart';
 
 class OCRService {
   final _textRecognizer = TextRecognizer();
@@ -71,7 +71,7 @@ class OCRService {
     } catch (e, stack) {
       debugLogs.writeln("EXCEPTION: $e");
       debugLogs.writeln("STACK: $stack");
-      print('Error scanning PDF: $e');
+      debugPrint('Error scanning PDF: $e');
     }
     
     return {
@@ -124,7 +124,7 @@ class OCRService {
     DateTime? expiryDate;
     
     // Debug: print all text
-    print("OCR Text detected: ${recognizedText.text}");
+    debugPrint("OCR Text detected: ${recognizedText.text}");
 
     // 1. Collect and Sort Lines by Y-coordinate (Top to Bottom)
     List<TextLine> allLines = [];
@@ -142,7 +142,7 @@ class OCRService {
     });
 
     List<String> sortedTextLines = allLines.map((e) => e.text).toList();
-    print("Sorted OCR Lines: $sortedTextLines");
+    debugPrint("Sorted OCR Lines: $sortedTextLines");
 
     // Regex to find dates: matches things like 12/12/2022, 12-Dec-2022, 2022.12.12, 12 12 2024
     final datePattern = RegExp(r'(?:\d{1,2}[-/\. ]\d{1,2}[-/\. ]\d{2,4})|(?:\d{1,2}[-/\. ][A-Za-z]{3}[-/\. ]\d{2,4})|(?:\d{4}[-/\. ]\d{1,2}[-/\. ]\d{1,2})');
@@ -166,7 +166,7 @@ class OCRService {
         }
     }
     
-    print("Found dates: $foundDates");
+    debugPrint("Found dates: $foundDates");
 
     // Strategy 1: Look for keywords on the SAME line or PREVIOUS/NEXT lines
     // Keywords for Expiry: "exp", "valid", "until", "to"
@@ -189,9 +189,9 @@ class OCRService {
       contextText = contextText.toLowerCase();
 
       if (contextText.contains('exp') || contextText.contains('valid') || contextText.contains('until') || contextText.contains('bad')) {
-        if (expiryDate == null) expiryDate = date;
+        expiryDate ??= date;
       } else if (contextText.contains('issue') || contextText.contains('reg') || contextText.contains('start') || contextText.contains('from') || contextText.contains('w.e.f')) {
-        if (issueDate == null) issueDate = date;
+        issueDate ??= date;
       }
     }
     

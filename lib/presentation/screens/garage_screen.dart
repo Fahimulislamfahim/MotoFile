@@ -46,7 +46,7 @@ class _GarageScreenState extends State<GarageScreen> {
                 GlassCard(
                   padding: const EdgeInsets.all(32),
                   borderRadius: 200, // Circular
-                  child: Icon(Icons.two_wheeler_rounded, size: 64, color: AppColors.primaryLight.withOpacity(0.5)),
+                  child: Icon(Icons.two_wheeler_rounded, size: 64, color: AppColors.primaryLight.withValues(alpha: 0.5)),
                 ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
                 const SizedBox(height: 24),
                 Text(
@@ -69,7 +69,7 @@ class _GarageScreenState extends State<GarageScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     elevation: 8,
-                    shadowColor: AppColors.primaryLight.withOpacity(0.4),
+                    shadowColor: AppColors.primaryLight.withValues(alpha: 0.4),
                   ),
                   icon: const Icon(Icons.add),
                   label: const Text('Add Vehicle'),
@@ -141,9 +141,9 @@ class _GarageScreenState extends State<GarageScreen> {
                             child: Column(
                               children: [
                                 _buildSpecRole(context, 'Tyre Pressure', vehicle.tyrePressure ?? 'N/A', Icons.air_rounded),
-                                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                                Divider(height: 1, color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
                                 _buildSpecRole(context, 'Engine Oil', vehicle.oilType ?? 'N/A', Icons.opacity_rounded),
-                                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                                Divider(height: 1, color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
                                 _buildSpecRole(context, 'Fuel Capacity', vehicle.fuelCapacity != null ? '${vehicle.fuelCapacity} L' : 'N/A', Icons.local_gas_station_rounded),
                               ],
                             ),
@@ -183,19 +183,19 @@ class _GarageScreenState extends State<GarageScreen> {
                                 _buildActionRow(context, 'Service History', Icons.history_rounded, () {
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => ServiceHistoryScreen(vehicle: vehicle)));
                                 }),
-                                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                                Divider(height: 1, color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
                                 _buildActionRow(context, 'Fuel Tracker', Icons.local_gas_station_rounded, () {
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => FuelHistoryScreen(vehicle: vehicle)));
                                 }),
-                                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                                Divider(height: 1, color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
                                 _buildActionRow(context, 'Maintenance Reminders', Icons.notifications_active_rounded, () {
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => RemindersScreen(vehicle: vehicle)));
                                 }),
-                                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                                Divider(height: 1, color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
                                 _buildActionRow(context, 'Daily Log & Calendar', Icons.calendar_month_rounded, () {
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => DailyLogScreen(vehicle: vehicle)));
                                 }),
-                                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                                Divider(height: 1, color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
                                 _buildActionRow(context, 'Analytics & Charts', Icons.bar_chart_rounded, () {
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => AnalyticsScreen(vehicle: vehicle)));
                                 }),
@@ -224,7 +224,7 @@ class _GarageScreenState extends State<GarageScreen> {
                       width: 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: AppColors.primaryLight.withOpacity(0.5),
+                        color: AppColors.primaryLight.withValues(alpha: 0.5),
                         shape: BoxShape.circle,
                       ),
                     );
@@ -257,7 +257,7 @@ class _GarageScreenState extends State<GarageScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7))),
+                    Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7))),
                     Text(
                       value, 
                       style: const TextStyle(fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis),
@@ -276,7 +276,7 @@ class _GarageScreenState extends State<GarageScreen> {
     Navigator.of(context).push(PageRouteBuilder(
       opaque: false,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.6), // Dim background
+      barrierColor: Colors.black.withValues(alpha: 0.6), // Dim background
       transitionDuration: const Duration(milliseconds: 400),
       reverseTransitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, animation, secondaryAnimation) {
@@ -307,7 +307,7 @@ class _GarageScreenState extends State<GarageScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(20),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primaryLight.withOpacity(0.1),
+                                    color: AppColors.primaryLight.withValues(alpha: 0.1),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(icon, size: 48, color: AppColors.primaryLight),
@@ -317,7 +317,7 @@ class _GarageScreenState extends State<GarageScreen> {
                                   label,
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                                    color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                                     letterSpacing: 1.2,
                                   ),
                                 ),
@@ -360,7 +360,7 @@ class _GarageScreenState extends State<GarageScreen> {
                                   'Tap outside to close',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey.withOpacity(0.5)
+                                    color: Colors.grey.withValues(alpha: 0.5)
                                   ),
                                 )
                               ],
@@ -384,7 +384,7 @@ class _GarageScreenState extends State<GarageScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.primaryLight.withOpacity(0.1),
+          color: AppColors.primaryLight.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8)
         ),
         child: Icon(icon, color: AppColors.primaryLight, size: 20),
@@ -410,7 +410,7 @@ class _GarageScreenState extends State<GarageScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [AppColors.accentLight.withOpacity(0.2), AppColors.primaryLight.withOpacity(0.1)]),
+                  gradient: LinearGradient(colors: [AppColors.accentLight.withValues(alpha: 0.2), AppColors.primaryLight.withValues(alpha: 0.1)]),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: AppColors.accentLight, size: 22),
@@ -418,7 +418,7 @@ class _GarageScreenState extends State<GarageScreen> {
               const SizedBox(width: 16),
               Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const Spacer(),
-              Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey.withOpacity(0.5)),
+              Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey.withValues(alpha: 0.5)),
             ],
           ),
         ),
@@ -446,7 +446,7 @@ class _GarageScreenState extends State<GarageScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
-                          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4))
+                          BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 4))
                         ],
                       ),
                       child: ClipRRect(
@@ -523,7 +523,7 @@ class _GarageScreenState extends State<GarageScreen> {
                     height: 180,
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
-                      return Icon(Icons.two_wheeler_rounded, size: 80, color: AppColors.primaryLight.withOpacity(0.5));
+                      return Icon(Icons.two_wheeler_rounded, size: 80, color: AppColors.primaryLight.withValues(alpha: 0.5));
                     },
                   ).animate().scale(duration: 800.ms, curve: Curves.easeOutBack).fadeIn(),
                 ),
@@ -567,11 +567,11 @@ class _GarageScreenState extends State<GarageScreen> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryLight.withOpacity(0.1),
+                  color: AppColors.primaryLight.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.primaryLight.withOpacity(0.2), width: 2),
+                  border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.2), width: 2),
                   boxShadow: [
-                    BoxShadow(color: AppColors.primaryLight.withOpacity(0.2), blurRadius: 20)
+                    BoxShadow(color: AppColors.primaryLight.withValues(alpha: 0.2), blurRadius: 20)
                   ]
                 ),
                 child: Icon(
@@ -592,7 +592,7 @@ class _GarageScreenState extends State<GarageScreen> {
                     const SizedBox(height: 4),
                     Text(
                       '${vehicle.make} ${vehicle.model} (${vehicle.year})',
-                      style: TextStyle(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7)),
+                      style: TextStyle(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7)),
                     ),
                   ],
                 ),
@@ -618,14 +618,14 @@ class _GarageScreenState extends State<GarageScreen> {
         color: Theme.of(context).colorScheme.surface, 
         // Note: Removed opacity for header text container for better contrast on images
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+        border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
       ),
       child: Text(
         '${vehicle.make} ${vehicle.model} • ${vehicle.year}',
           textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: 14, 
-          color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.8),
+          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
           fontWeight: FontWeight.w500
         ),
       ),
@@ -645,7 +645,7 @@ class _GarageScreenState extends State<GarageScreen> {
       icon: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color:  Theme.of(context).cardColor.withOpacity(0.5),
+          color:  Theme.of(context).cardColor.withValues(alpha: 0.5),
           shape: BoxShape.circle,
         ),
         child: const Icon(Icons.edit_rounded, size: 20),
