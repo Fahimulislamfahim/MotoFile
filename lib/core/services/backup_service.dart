@@ -40,7 +40,6 @@ class BackupService {
       // 3. Zip it
       final zipEncoder = ZipEncoder();
       final zipData = zipEncoder.encode(archive);
-      if (zipData == null) throw Exception("Failed to encode zip");
 
       // 4. Save zip temporarily to share
       final tempDir = await getTemporaryDirectory();

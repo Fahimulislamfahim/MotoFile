@@ -54,7 +54,7 @@ class _AboutScreenState extends State<AboutScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Provider.of<ThemeService>(context).isDarkMode;
-    final primaryColor = AppColors.primaryLight;
+
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -174,7 +174,7 @@ class _AboutScreenState extends State<AboutScreen> {
               height: 160,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primaryLight.withOpacity(0.4),
+                color: AppColors.primaryLight.withValues(alpha: 0.4),
               ),
             ).animate(onPlay: (c) => c.repeat(reverse: true))
              .blur(begin: const Offset(20, 20), end: const Offset(40, 40), duration: 2.seconds)
@@ -186,10 +186,10 @@ class _AboutScreenState extends State<AboutScreen> {
               height: 150,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.2), width: 4),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 4),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -199,7 +199,7 @@ class _AboutScreenState extends State<AboutScreen> {
                 child: Image.asset(
                   'assets/images/developer.jpg',
                   fit: BoxFit.cover,
-                  errorBuilder: (ctx, _, __) => Container(
+                  errorBuilder: (ctx, _, _) => Container(
                     color: isDark ? const Color(0xFF1E1E1E) : Colors.grey[200],
                     child: Icon(Icons.person_rounded, size: 60, color: AppColors.primaryLight),
                   ),
@@ -247,7 +247,7 @@ class _AboutScreenState extends State<AboutScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryLight.withOpacity(0.1),
+                    color: AppColors.primaryLight.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(Icons.code_rounded, color: AppColors.primaryLight),
@@ -390,7 +390,7 @@ class _AboutScreenState extends State<AboutScreen> {
         style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: isDark ? Colors.white.withOpacity(0.9) : AppColors.primaryLight,
+          color: isDark ? Colors.white.withValues(alpha: 0.9) : AppColors.primaryLight,
         ),
       ),
     );
@@ -417,7 +417,7 @@ class _AnimatedBackground extends StatelessWidget {
             height: 300,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primaryLight.withOpacity(0.3),
+              color: AppColors.primaryLight.withValues(alpha: 0.3),
             ),
           ).animate(onPlay: (c) => c.repeat(reverse: true))
            .moveX(begin: 0, end: 50, duration: 4.seconds)
@@ -432,7 +432,7 @@ class _AnimatedBackground extends StatelessWidget {
             height: 250,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.accentLight.withOpacity(0.3),
+              color: AppColors.accentLight.withValues(alpha: 0.3),
             ),
           ).animate(onPlay: (c) => c.repeat(reverse: true))
            .moveY(begin: 0, end: 50, duration: 6.seconds)

@@ -10,7 +10,6 @@ import '../../data/models/reminder_model.dart';
 import '../../data/models/daily_log_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
-import 'package:intl/intl.dart';
 
 
 class VehicleService extends ChangeNotifier {

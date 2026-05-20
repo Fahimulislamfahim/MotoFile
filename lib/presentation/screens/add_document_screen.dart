@@ -9,7 +9,6 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:confetti/confetti.dart';
 import '../../data/daos/document_dao.dart';
-import '../../data/database_helper.dart';
 import '../../data/models/document_model.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/services/ocr_service.dart';
@@ -177,8 +176,11 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
       if (_expiryDate != null) {
         final now = DateTime.now();
         final daysUntilExpiry = _expiryDate!.difference(now).inDays;
-        if (daysUntilExpiry < 0) status = 'Expired';
-        else if (daysUntilExpiry <= 30) status = 'Expiring';
+        if (daysUntilExpiry < 0) {
+          status = 'Expired';
+        } else if (daysUntilExpiry <= 30) {
+          status = 'Expiring';
+        }
       }
 
       final typeToSave = _selectedType == 'Other' ? _customTypeController.text.trim() : _selectedType!;
@@ -194,13 +196,20 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
       await NotificationService().scheduleExpiryNotification(id: id, title: typeToSave, expiryDate: _expiryDate);
 
       _confettiController.play();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Document Saved!'), backgroundColor: AppColors.success));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Document Saved!'), backgroundColor: AppColors.success));
+      }
       
       await Future.delayed(const Duration(milliseconds: 1500));
+      if (!mounted) return;
 
-      if (mounted) Navigator.pop(context, true);
+      if (mounted) {
+        Navigator.pop(context, true);
+      }
     } else if (_pickedFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a file or scan a document')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a file or scan a document')));
+      }
     }
   }
 
@@ -225,7 +234,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
                   child: Column(
                     children: [
                        DropdownButtonFormField<String>(
-                        value: _selectedType,
+                        initialValue: _selectedType,
                         decoration: const InputDecoration(labelText: 'Document Type', border: InputBorder.none),
                         dropdownColor: AppColors.surfaceLight,
                         style: Theme.of(context).textTheme.bodyLarge,
@@ -339,7 +348,7 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
                 backgroundColor: AppColors.primaryLight,
                 foregroundColor: Colors.white,
                 elevation: 10,
-                shadowColor: AppColors.primaryLight.withOpacity(0.5),
+                shadowColor: AppColors.primaryLight.withValues(alpha: 0.5),
                 shape: const StadiumBorder(),
               ),
               child: const Text('SAVE DOCUMENT', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1)),
@@ -356,11 +365,11 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isPrimary ? AppColors.primaryLight : Theme.of(context).cardColor.withOpacity(0.5),
+          color: isPrimary ? AppColors.primaryLight : Theme.of(context).cardColor.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(32),
-          border: Border.all(color: AppColors.primaryLight.withOpacity(0.3)),
+          border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.3)),
           boxShadow: [
-             BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: Offset(0, 4))
+             BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: Offset(0, 4))
           ]
         ),
         child: Column(

@@ -91,7 +91,7 @@ class _SplashScreenState extends State<SplashScreen> {
               Text(
                 'Premium Document Manager',
                 style: TextStyle(
-                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                  color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                   letterSpacing: 1.2,
                 ),
               ).animate().fadeIn(delay: 500.ms),
@@ -106,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.primaryLight.withOpacity(0.3)),
+                      border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.3)),
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Text(

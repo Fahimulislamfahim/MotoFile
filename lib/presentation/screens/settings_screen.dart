@@ -95,7 +95,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         trailing: Switch.adaptive(
                           value: isDark,
                           onChanged: (value) => themeService.toggleTheme(),
-                          activeColor: AppColors.primaryLight,
+                          activeTrackColor: AppColors.primaryLight,
                         ),
                       ),
                     ],
@@ -128,7 +128,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             );
                           },
-                          activeColor: AppColors.primaryLight,
+                          activeTrackColor: AppColors.primaryLight,
                         ),
                       ),
                     ],
@@ -263,7 +263,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryLight.withOpacity(0.1),
+                  color: AppColors.primaryLight.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -298,7 +298,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
-              if (trailing != null) trailing,
+              ?trailing,
             ],
           ),
         ),
@@ -329,9 +329,9 @@ class _SettingsBackground extends StatelessWidget {
             height: 300,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primaryLight.withOpacity(0.15),
+              color: AppColors.primaryLight.withValues(alpha: 0.15),
               boxShadow: [
-                BoxShadow(color: AppColors.primaryLight.withOpacity(0.1), blurRadius: 100),
+                BoxShadow(color: AppColors.primaryLight.withValues(alpha: 0.1), blurRadius: 100),
               ],
             ),
           ).animate(onPlay: (c) => c.repeat(reverse: true))
@@ -346,9 +346,9 @@ class _SettingsBackground extends StatelessWidget {
             height: 250,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.accentLight.withOpacity(0.1),
+              color: AppColors.accentLight.withValues(alpha: 0.1),
               boxShadow: [
-                BoxShadow(color: AppColors.accentLight.withOpacity(0.05), blurRadius: 80),
+                BoxShadow(color: AppColors.accentLight.withValues(alpha: 0.05), blurRadius: 80),
               ],
             ),
           ).animate(onPlay: (c) => c.repeat(reverse: true))

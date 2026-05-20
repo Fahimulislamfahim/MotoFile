@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -19,7 +20,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path, 
-      version: 8, 
+      version: 9,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -32,6 +33,7 @@ class DatabaseHelper {
     await _createFuelLogTable(db);
     await _createReminderTable(db);
     await _createDailyLogTable(db);
+    await _createIndexes(db);
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -51,7 +53,7 @@ class DatabaseHelper {
       try {
         await db.execute('ALTER TABLE vehicles ADD COLUMN image_path TEXT');
       } catch (e) {
-        print("Error adding image_path column: $e");
+        debugPrint("Error adding image_path column: $e");
       }
     }
     if (oldVersion < 7) {
@@ -61,9 +63,26 @@ class DatabaseHelper {
       try {
         await db.execute('ALTER TABLE daily_logs ADD COLUMN time TEXT');
       } catch (e) {
-        print("Error adding time column to daily_logs: $e");
+        debugPrint("Error adding time column to daily_logs: $e");
       }
     }
+    if (oldVersion < 9) {
+      try {
+        await _createIndexes(db);
+      } catch (e) {
+        debugPrint("Error creating indexes: $e");
+      }
+    }
+  }
+
+  Future _createIndexes(Database db) async {
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_fuel_logs_vehicle_id ON fuel_logs (vehicle_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_fuel_logs_date ON fuel_logs (date)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_service_logs_vehicle_id ON service_logs (vehicle_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_service_logs_date ON service_logs (date)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_reminders_vehicle_id ON reminders (vehicle_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_daily_logs_vehicle_id ON daily_logs (vehicle_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_daily_logs_date ON daily_logs (date)');
   }
 
   Future _createDocumentTable(Database db) async {

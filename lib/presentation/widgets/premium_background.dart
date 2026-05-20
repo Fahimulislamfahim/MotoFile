@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
@@ -32,8 +31,8 @@ class PremiumBackground extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AppColors.primaryLight.withOpacity(0.25),
-                  AppColors.primaryLight.withOpacity(0.0),
+                  AppColors.primaryLight.withValues(alpha: 0.25),
+                  AppColors.primaryLight.withValues(alpha: 0.0),
                 ],
               ),
             ),
@@ -53,8 +52,8 @@ class PremiumBackground extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AppColors.accentLight.withOpacity(0.2),
-                  AppColors.accentLight.withOpacity(0.0),
+                  AppColors.accentLight.withValues(alpha: 0.2),
+                  AppColors.accentLight.withValues(alpha: 0.0),
                 ],
               ),
             ),
@@ -74,8 +73,8 @@ class PremiumBackground extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  (isDark ? Colors.purple : Colors.blue).withOpacity(0.15),
-                  (isDark ? Colors.purple : Colors.blue).withOpacity(0.0),
+                  (isDark ? Colors.purple : Colors.blue).withValues(alpha: 0.15),
+                  (isDark ? Colors.purple : Colors.blue).withValues(alpha: 0.0),
                 ],
               ),
             ),

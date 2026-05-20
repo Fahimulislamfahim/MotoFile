@@ -98,17 +98,17 @@ class _RemindersScreenState extends State<RemindersScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.notifications_none_rounded, size: 64, color: Colors.grey.withOpacity(0.5)),
+                        Icon(Icons.notifications_none_rounded, size: 64, color: Colors.grey.withValues(alpha: 0.5)),
                         const SizedBox(height: 16),
                         Text(
                           'No Reminders Set',
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.grey.withOpacity(0.7)),
+                              color: Colors.grey.withValues(alpha: 0.7)),
                         ),
                         const SizedBox(height: 8),
-                        Text('Set alerts for oil changes, renewals, etc.', style: TextStyle(color: Colors.grey.withOpacity(0.5))),
+                        Text('Set alerts for oil changes, renewals, etc.', style: TextStyle(color: Colors.grey.withValues(alpha: 0.5))),
                       ],
                     ),
                   )
@@ -130,7 +130,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                               leading: Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: statusColor.withOpacity(0.1),
+                                  color: statusColor.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12)
                                 ),
                                 child: Icon(Icons.notifications_active_rounded, color: statusColor)
@@ -147,15 +147,15 @@ class _RemindersScreenState extends State<RemindersScreen> {
                                   if (reminder.isRecurring)
                                     Row(
                                       children: [
-                                        Icon(Icons.repeat_rounded, size: 12, color: Colors.grey.withOpacity(0.7)),
+                                        Icon(Icons.repeat_rounded, size: 12, color: Colors.grey.withValues(alpha: 0.7)),
                                         const SizedBox(width: 4),
-                                        Text('Repeating', style: TextStyle(fontSize: 12, color: Colors.grey.withOpacity(0.7))),
+                                        Text('Repeating', style: TextStyle(fontSize: 12, color: Colors.grey.withValues(alpha: 0.7))),
                                       ],
                                     )
                                 ],
                               ),
                               trailing: IconButton(
-                                icon: Icon(Icons.check_circle_outline_rounded, color: Colors.grey.withOpacity(0.5)),
+                                icon: Icon(Icons.check_circle_outline_rounded, color: Colors.grey.withValues(alpha: 0.5)),
                                 onPressed: () => _deleteReminder(reminder.id!),
                               ),
                             ),

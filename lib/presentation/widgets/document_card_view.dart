@@ -54,9 +54,9 @@ class DocumentCardView extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.2)),
+                    border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.2)),
                   ),
                   child: Icon(
                     _getDocumentIcon(),
@@ -68,10 +68,10 @@ class DocumentCardView extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: _getStatusColor().withOpacity(0.15),
+                    color: _getStatusColor().withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: _getStatusColor().withOpacity(0.4),
+                      color: _getStatusColor().withValues(alpha: 0.4),
                       width: 1.5,
                     ),
                   ),
@@ -103,13 +103,13 @@ class DocumentCardView extends StatelessWidget {
                   Icon(
                     Icons.calendar_today_outlined,
                     size: 16,
-                    color: Theme.of(context).primaryColor.withOpacity(0.7),
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'Expires: ${DateFormat('MMM dd, yyyy').format(expiryDate!)}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                         ),
                   ),
                 ],
@@ -126,7 +126,7 @@ class DocumentCardView extends StatelessWidget {
                   Text(
                     status == 'Missing' ? 'Tap to add document' : 'No expiry date',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5),
+                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
                           fontStyle: FontStyle.italic,
                         ),
                   ),
@@ -140,13 +140,13 @@ class DocumentCardView extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Theme.of(context).primaryColor.withOpacity(0.2),
-                    Theme.of(context).primaryColor.withOpacity(0.05),
+                    Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                    Theme.of(context).primaryColor.withValues(alpha: 0.05),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Theme.of(context).primaryColor.withOpacity(0.2),
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
                 ),
               ),
               child: Row(

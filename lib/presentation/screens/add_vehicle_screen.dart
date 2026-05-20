@@ -163,7 +163,7 @@ class _AddEditVehicleScreenState extends State<AddEditVehicleScreen> {
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                      border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                       image: _selectedImagePath != null
                           ? DecorationImage(
                               image: FileImage(File(_selectedImagePath!)),
@@ -199,7 +199,7 @@ class _AddEditVehicleScreenState extends State<AddEditVehicleScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedType,
+                initialValue: _selectedType,
                 decoration: const InputDecoration(
                   labelText: 'Type',
                   border: OutlineInputBorder(),
@@ -216,7 +216,7 @@ class _AddEditVehicleScreenState extends State<AddEditVehicleScreen> {
                   Expanded(
                     child: _selectedType == 'Bike'
                       ? DropdownButtonFormField<String>(
-                          value: _bikeMakes.containsKey(_makeController.text) ? _makeController.text : 'Yamaha',
+                          initialValue: _bikeMakes.containsKey(_makeController.text) ? _makeController.text : 'Yamaha',
                           decoration: const InputDecoration(labelText: 'Make', border: OutlineInputBorder()),
                           items: _bikeMakes.keys.map((make) {
                             return DropdownMenuItem(value: make, child: Text(make));
@@ -243,7 +243,7 @@ class _AddEditVehicleScreenState extends State<AddEditVehicleScreen> {
                               DropdownButtonFormField<String>(
                                 isExpanded: true,
                                 decoration: const InputDecoration(labelText: 'Model', border: OutlineInputBorder()),
-                                value: (_bikeMakes[_makeController.text]?.contains(_modelController.text) ?? false) 
+                                initialValue: (_bikeMakes[_makeController.text]?.contains(_modelController.text) ?? false)
                                     ? _modelController.text 
                                     : 'Other',
                                 items: [...(_bikeMakes[_makeController.text] ?? []), 'Other'].map<DropdownMenuItem<String>>((model) {

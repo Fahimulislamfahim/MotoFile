@@ -84,8 +84,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
     }
 
     // Calculate Average Mileage
-    double totalDistance = 0;
-    double totalFuel = 0;
+
+
     // Simple mileage calc: (Last Odo - First Odo) / Total Fuel (excluding first fill if needed, but keeping simple)
     // Actually, accurate mileage needs pairs. Let's do simple Total Odo / Total Liters for lifecycle or 
     // just map efficiency if logs have it. 
@@ -137,7 +137,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
                       color: AppColors.primaryLight,
                       barWidth: 3,
                       dotData: FlDotData(show: false),
-                      belowBarData: BarAreaData(show: true, color: AppColors.primaryLight.withOpacity(0.1)),
+                      belowBarData: BarAreaData(show: true, color: AppColors.primaryLight.withValues(alpha: 0.1)),
                     ),
                   ],
                 ),

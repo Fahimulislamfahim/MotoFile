@@ -21,7 +21,7 @@ class AppDrawer extends StatefulWidget {
 class _AppDrawerState extends State<AppDrawer> {
   final ProfileService _profileService = ProfileService();
   String _userName = 'MotoFile User';
-  String _userEmail = 'user@motofile.app';
+
 
   @override
   void initState() {
@@ -34,7 +34,7 @@ class _AppDrawerState extends State<AppDrawer> {
     if (mounted) {
       setState(() {
         _userName = profile['name']!;
-        _userEmail = profile['email']!;
+
       });
     }
   }
@@ -140,7 +140,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: isDark ? Colors.amber.withOpacity(0.2) : Colors.indigo.withOpacity(0.1),
+                                    color: isDark ? Colors.amber.withValues(alpha: 0.2) : Colors.indigo.withValues(alpha: 0.1),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
@@ -162,7 +162,7 @@ class _AppDrawerState extends State<AppDrawer> {
                             Switch.adaptive(
                               value: isDark,
                               onChanged: (val) => themeService.toggleTheme(),
-                              activeColor: AppColors.primaryLight,
+                              activeTrackColor: AppColors.primaryLight,
                             ),
                           ],
                         ),
@@ -202,7 +202,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 height: 70,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.primaryLight.withOpacity(0.3),
+                  color: AppColors.primaryLight.withValues(alpha: 0.3),
                 ),
               ).animate(onPlay: (c) => c.repeat(reverse: true))
                .blur(begin: const Offset(10, 10), end: const Offset(20, 20), duration: 2.seconds)
@@ -268,7 +268,7 @@ class _AppDrawerState extends State<AppDrawer> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryLight.withOpacity(0.1),
+                  color: AppColors.primaryLight.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: AppColors.primaryLight, size: 22),
@@ -320,7 +320,7 @@ class _DrawerBackground extends StatelessWidget {
       children: [
         // Base
         Container(
-          color: isDark ? const Color(0xFF0F172A).withOpacity(0.95) : const Color(0xFFF8F9FA).withOpacity(0.95),
+          color: isDark ? const Color(0xFF0F172A).withValues(alpha: 0.95) : const Color(0xFFF8F9FA).withValues(alpha: 0.95),
         ),
         
         // Blobs
@@ -332,7 +332,7 @@ class _DrawerBackground extends StatelessWidget {
             height: 200,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primaryLight.withOpacity(0.2),
+              color: AppColors.primaryLight.withValues(alpha: 0.2),
             ),
           ).animate(onPlay: (c) => c.repeat(reverse: true))
            .scale(begin: const Offset(1,1), end: const Offset(1.5,1.5), duration: 8.seconds),
@@ -346,7 +346,7 @@ class _DrawerBackground extends StatelessWidget {
             height: 150,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.accentLight.withOpacity(0.2),
+              color: AppColors.accentLight.withValues(alpha: 0.2),
             ),
           ).animate(onPlay: (c) => c.repeat(reverse: true))
            .moveY(begin: 0, end: -50, duration: 6.seconds),
